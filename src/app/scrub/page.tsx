@@ -8,8 +8,10 @@ export default function ScrubPage() {
   const [selectedZips, setSelectedZips] = useState<Set<string>>(new Set());
   const [selectedCats, setSelectedCats] = useState<Set<string>>(new Set());
   const [running, setRunning] = useState(false);
-  const [result, setResult] = useState<{ found: number; newLeads: number; duration: number } | null>(null);
+  const [clearing, setClearing] = useState(false);
+  const [result, setResult] = useState<{ found: number; newLeads: number; duration: number; demoMode?: boolean; configError?: string } | null>(null);
   const [history, setHistory] = useState<ScrubHistory[]>([]);
+  const [clearMsg, setClearMsg] = useState('');
 
   useEffect(() => {
     async function loadHistory() {
@@ -43,10 +45,22 @@ export default function ScrubPage() {
       const res = await fetch('/api/scrub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ zips: [...selectedZips], categories: [...selectedCats] }) });
       const data = await res.json();
       const duration = Math.round((Date.now() - start) / 1000);
-      setResult({ found: data.leadsFound || 0, newLeads: data.newLeads || 0, duration });
+      setResult({ found: data.leadsFound || 0, newLeads: data.newLeads || 0, duration, demoMode: data.demoMode, configError: data.configError });
     } catch {
       setResult({ found: 0, newLeads: 0, duration: Math.round((Date.now() - start) / 1000) });
     } finally { setRunning(false); }
+  };
+
+  const handleClearAllLeads = async () => {
+    if (!confirm('Delete ALL leads and buyers from your database? This cannot be undone.')) return;
+    setClearing(true); setClearMsg('');
+    try {
+      const { clearAllData } = await import('@/lib/firebase');
+      await clearAllData();
+      setClearMsg('All leads and buyers cleared.');
+    } catch {
+      setClearMsg('Failed to clear — make sure Firebase is connected.');
+    } finally { setClearing(false); }
   };
 
   const tier1 = ZIP_TIERS.filter((z) => z.tier === 1);
@@ -55,7 +69,41 @@ export default function ScrubPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold font-[family-name:var(--font-heading)] mb-5">Scrub Engine</h1>
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-2xl font-bold font-[family-name:var(--font-heading)]">Scrub Engine</h1>
+        <button
+          onClick={handleClearAllLeads}
+          disabled={clearing}
+          className="text-xs border border-red-300 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-40"
+        >
+          {clearing ? 'Clearing...' : 'Clear All Leads'}
+        </button>
+      </div>
+
+      {clearMsg && (
+        <div className="mb-4 px-4 py-3 rounded-lg text-sm bg-green-50 border border-green-200 text-green-700">{clearMsg}</div>
+      )}
+
+      {/* Data source warning */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-5">
+        <div className="flex items-start gap-3">
+          <span className="text-amber-500 text-lg mt-0.5">⚠</span>
+          <div>
+            <p className="text-sm font-semibold text-amber-800 mb-1">No Live Data Source Configured</p>
+            <p className="text-xs text-amber-700 mb-2">
+              Running a scrub without a data source returns zero results and saves nothing.
+              To pull real Delaware County leads, add a <strong>BatchLeads</strong> or <strong>PropStream</strong> API key.
+            </p>
+            <div className="flex flex-wrap gap-3 text-xs">
+              <span className="font-mono bg-amber-100 px-2 py-1 rounded text-amber-800">BATCHLEADS_API_KEY=your_key</span>
+              <span className="text-amber-600">→ Vercel dashboard → Settings → Environment Variables</span>
+            </div>
+            <p className="text-[10px] text-amber-600 mt-2">
+              BatchLeads: batchleads.io · PropStream: propstream.com · Plans start ~$99/mo
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="grid md:grid-cols-2 gap-4 mb-6">
         {/* Zip codes */}
@@ -107,14 +155,22 @@ export default function ScrubPage() {
       </button>
 
       {result && (
-        <div className="bg-[#2D7A4F]/10 border border-[#2D7A4F]/20 rounded-lg p-4 mb-6">
-          <h3 className="text-sm font-bold text-[#2D7A4F] mb-2">Scrub Complete</h3>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div><p className="text-2xl font-bold text-[#1B2A4A]">{result.found}</p><p className="text-xs text-gray-500">Leads Found</p></div>
-            <div><p className="text-2xl font-bold text-[#2D7A4F]">{result.newLeads}</p><p className="text-xs text-gray-500">New Leads</p></div>
-            <div><p className="text-2xl font-bold text-[#B8985A]">{result.duration}s</p><p className="text-xs text-gray-500">Duration</p></div>
+        result.demoMode ? (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+            <p className="text-sm font-semibold text-gray-700 mb-1">No Data Source Connected</p>
+            <p className="text-xs text-gray-500">{result.configError}</p>
+            <p className="text-xs text-gray-400 mt-1">Nothing was saved to your database.</p>
           </div>
-        </div>
+        ) : (
+          <div className="bg-[#2D7A4F]/10 border border-[#2D7A4F]/20 rounded-lg p-4 mb-6">
+            <h3 className="text-sm font-bold text-[#2D7A4F] mb-2">Scrub Complete</h3>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div><p className="text-2xl font-bold text-[#1B2A4A]">{result.found}</p><p className="text-xs text-gray-500">Leads Found</p></div>
+              <div><p className="text-2xl font-bold text-[#2D7A4F]">{result.newLeads}</p><p className="text-xs text-gray-500">New Leads</p></div>
+              <div><p className="text-2xl font-bold text-[#B8985A]">{result.duration}s</p><p className="text-xs text-gray-500">Duration</p></div>
+            </div>
+          </div>
+        )
       )}
 
       {history.length > 0 && (

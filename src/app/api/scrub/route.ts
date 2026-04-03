@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { simulateScrub } from '@/lib/ai';
+import { scrubLeads } from '@/lib/ai';
 import { scoreLead } from '@/lib/scoring';
 import { stackLeads } from '@/lib/stacking';
 import { addLead } from '@/lib/firebase';
@@ -17,10 +17,24 @@ export async function POST(request: Request) {
       );
     }
 
-    // Run simulated scrub
-    const rawLeads = await simulateScrub(zips, categories as CategoryId[]);
+    const { leads: rawLeads, demoMode, error } = await scrubLeads(zips, categories as CategoryId[]);
 
-    // Convert to full Lead objects with temporary ids for scoring and stacking
+    // If no real data source configured, return immediately without saving anything
+    if (demoMode) {
+      return NextResponse.json({
+        leadsFound: 0,
+        newLeads: 0,
+        leads: [],
+        demoMode: true,
+        configError: error,
+      });
+    }
+
+    if (rawLeads.length === 0) {
+      return NextResponse.json({ leadsFound: 0, newLeads: 0, leads: [], demoMode: false });
+    }
+
+    // Convert to full Lead objects for scoring and stacking
     const now = new Date();
     const leadsWithIds: Lead[] = rawLeads.map((raw, i) => ({
       ...raw,
@@ -29,24 +43,20 @@ export async function POST(request: Request) {
       updatedAt: now,
     }));
 
-    // Score each lead
     for (const lead of leadsWithIds) {
       const { score, tier } = scoreLead(lead);
       lead.score = score;
       lead.scoreTier = tier;
     }
 
-    // Run list stacking to merge duplicates
     const stackedLeads = stackLeads(leadsWithIds);
 
-    // Re-score after stacking (stack count affects score)
     for (const lead of stackedLeads) {
       const { score, tier } = scoreLead(lead);
       lead.score = score;
       lead.scoreTier = tier;
     }
 
-    // Try to save each lead to Firebase
     const savedLeads: Lead[] = [];
     for (const lead of stackedLeads) {
       try {
@@ -54,7 +64,6 @@ export async function POST(request: Request) {
         const firebaseId = await addLead(leadData);
         savedLeads.push({ ...lead, id: firebaseId });
       } catch {
-        // Firebase not configured or save failed — keep the lead with temp id
         savedLeads.push(lead);
       }
     }
@@ -63,6 +72,7 @@ export async function POST(request: Request) {
       leadsFound: rawLeads.length,
       newLeads: stackedLeads.length,
       leads: savedLeads,
+      demoMode: false,
     });
   } catch (error) {
     console.error('Scrub API error:', error);

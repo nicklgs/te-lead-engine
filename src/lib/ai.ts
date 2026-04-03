@@ -1,65 +1,87 @@
-// AI helper — currently returns simulated results.
-// When ANTHROPIC_API_KEY is configured, swap to real Claude API calls.
+// AI / data-source helpers
+// Real scrub: set BATCHLEADS_API_KEY in .env.local (or Vercel env vars)
+// Skip trace / comps: set ANTHROPIC_API_KEY for live AI lookups (simulated otherwise)
 
 import type { Lead, SkipTrace, Comps, Buyer, CategoryId } from './types';
 import { CATEGORY_MAP, ZIP_TIERS } from './constants';
 
-// Simulated scrub results for demo
-const DEMO_ADDRESSES: Record<string, string[]> = {
-  '19013': ['412 W 3rd St', '1025 Morton Ave', '618 Kerlin St', '329 E 22nd St', '810 Highland Ave', '1442 Upland St'],
-  '19023': ['227 Pine St', '401 Main St', '145 Chester Pike', '812 Cypress St', '534 Oak Ln'],
-  '19082': ['6820 Market St', '143 S 69th St', '301 Long Ln', '7025 Terminal Sq', '425 Garrett Rd'],
-  '19026': ['740 Burmont Rd', '215 Shadeland Ave', '432 State Rd', '1001 Childs Ave'],
-  '19050': ['120 Lansdowne Ave', '45 Baltimore Ave', '312 Owen Ave', '88 Nyack Ave'],
+// ---------------------------------------------------------------------------
+// Category → BatchLeads filter mapping
+// ---------------------------------------------------------------------------
+const CAT_TO_BATCHLEADS: Record<CategoryId, Record<string, unknown>> = {
+  tx: { taxDelinquent: true },
+  fc: { preForeclosure: true },
+  cv: { codeViolation: true },
+  pb: { probate: true },
+  vc: { vacant: true },
+  fs: { listingStatus: 'FSBO' },
+  dv: { divorce: true },
+  ex: { listingStatus: 'Expired' },
 };
 
-const DEMO_OWNERS = [
-  'James Wilson', 'Maria Rodriguez', 'Robert Chen', 'Patricia Davis', 'Michael Brown',
-  'Linda Thompson', 'David Garcia', 'Susan Martinez', 'William Johnson', 'Jennifer Lee',
-  'Charles Williams', 'Karen Taylor', 'Joseph Anderson', 'Margaret Thomas', 'Richard Jackson',
-];
+// ---------------------------------------------------------------------------
+// Real scrub via BatchLeads API
+// ---------------------------------------------------------------------------
+export async function scrubLeads(
+  zips: string[],
+  categories: CategoryId[]
+): Promise<{ leads: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>[]; demoMode: boolean; error?: string }> {
+  const apiKey = process.env.BATCHLEADS_API_KEY;
 
-const DEMO_DETAILS: Record<CategoryId, string[]> = {
-  tx: ['Delinquent property taxes since 2022, $4,200 owed', 'Tax lien filed, upset sale scheduled Q2 2026', 'Behind on property taxes 3 years, $8,100 total'],
-  fc: ['Lis pendens filed Jan 2026, mortgage default', 'Pre-foreclosure notice, sheriff sale pending', 'Behind on payments 6 months, foreclosure filing'],
-  cv: ['Multiple code violations, condemned property', 'Failed inspection — electrical and plumbing', 'Code enforcement action, boarded windows'],
-  pb: ['Inherited property, probate filed Oct 2025', 'Estate sale — deceased owner, orphans court', 'Probate property, heirs seeking quick sale'],
-  vc: ['Vacant 18+ months, abandoned, mail returned', 'Blighted property, vacant and boarded', 'Abandoned property, water shut off 2024'],
-  fs: ['FSBO listing, 120 days on market, no offers', 'For sale by owner, motivated seller', 'FSBO — owner relocating, priced to sell'],
-  dv: ['Divorce filing, court-ordered property sale', 'Separation — both parties want to sell quickly', 'Divorce decree requires property liquidation'],
-  ex: ['Expired MLS listing, 180 days, two price reductions', 'Withdrawn from MLS, agent dropped listing', 'Expired listing, originally listed at $185K'],
-};
-
-function randomFrom<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function randomPhone(): string {
-  return `(484) ${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
-}
-
-export async function simulateScrub(zips: string[], categories: CategoryId[]): Promise<Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>[]> {
-  // Simulate API delay
-  await new Promise(r => setTimeout(r, 1500));
+  if (!apiKey) {
+    return { leads: [], demoMode: true, error: 'No data source configured. Add BATCHLEADS_API_KEY to enable real scrubs.' };
+  }
 
   const leads: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>[] = [];
 
-  for (const zip of zips) {
-    const addresses = DEMO_ADDRESSES[zip] || [`${Math.floor(Math.random() * 900) + 100} Main St`];
-    for (const catId of categories) {
-      const cat = CATEGORY_MAP[catId];
-      if (!cat) continue;
-      const numLeads = Math.floor(Math.random() * 3) + 1;
-      for (let i = 0; i < numLeads; i++) {
-        const addr = randomFrom(addresses);
-        const area = ZIP_TIERS.find(z => z.zip === zip)?.area || 'Delaware County';
+  for (const catId of categories) {
+    const cat = CATEGORY_MAP[catId];
+    if (!cat) continue;
+    const filters = CAT_TO_BATCHLEADS[catId];
+
+    try {
+      const res = await fetch('https://api.batchleads.io/v2/lists/build', {
+        method: 'POST',
+        headers: {
+          'Authorization': apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          filters: {
+            state: 'PA',
+            county: 'Delaware',
+            zipCodes: zips,
+            ...filters,
+          },
+          page: 1,
+          perPage: 50,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error(`BatchLeads error for ${catId}:`, res.status, text);
+        continue;
+      }
+
+      const data = await res.json();
+      const properties: Record<string, unknown>[] = data.properties || data.results || data.data || [];
+
+      for (const prop of properties) {
+        const addr = [prop.address, prop.streetAddress, prop.propertyAddress]
+          .find((a) => typeof a === 'string' && a.trim()) as string | undefined;
+        if (!addr) continue;
+
+        const zip = String(prop.zip || prop.zipCode || prop.postalCode || '');
+        const area = ZIP_TIERS.find((z) => z.zip === zip)?.area || 'Delaware County';
+
         leads.push({
           title: `${addr}, ${area}, PA ${zip}`,
           category: cat.label,
           categoryId: catId,
           location: `${area}, PA ${zip}`,
           zip,
-          details: randomFrom(DEMO_DETAILS[catId] || ['Distressed property identified via public records']),
+          details: buildDetails(prop, catId),
           sourceUrl: '',
           source: 'scrub',
           stage: 'new',
@@ -75,15 +97,71 @@ export async function simulateScrub(zips: string[], categories: CategoryId[]): P
           activities: [{
             id: 1,
             type: 'note',
-            text: `Lead discovered via ${cat.label} scrub`,
+            text: `Lead discovered via BatchLeads ${cat.label} scrub`,
             date: new Date(),
           }],
         });
       }
+    } catch (err) {
+      console.error(`BatchLeads fetch failed for ${catId}:`, err);
     }
   }
 
-  return leads;
+  return { leads, demoMode: false };
+}
+
+function buildDetails(prop: Record<string, unknown>, catId: CategoryId): string {
+  const parts: string[] = [];
+
+  if (catId === 'tx') {
+    const amt = prop.taxDelinquentAmount || prop.delinquentAmount;
+    const yr = prop.taxDelinquentYear || prop.delinquentSince;
+    if (amt) parts.push(`Tax delinquent $${Number(amt).toLocaleString()}`);
+    if (yr) parts.push(`since ${yr}`);
+  } else if (catId === 'fc') {
+    const date = prop.foreclosureDate || prop.lisPendensDate;
+    if (date) parts.push(`Lis pendens filed ${date}`);
+    const lender = prop.lender || prop.foreclosingLender;
+    if (lender) parts.push(`Lender: ${lender}`);
+  } else if (catId === 'pb') {
+    const date = prop.probateDate || prop.probateFiledDate;
+    if (date) parts.push(`Probate filed ${date}`);
+  } else if (catId === 'vc') {
+    const since = prop.vacantSince || prop.vacantDate;
+    if (since) parts.push(`Vacant since ${since}`);
+  } else if (catId === 'ex') {
+    const dom = prop.daysOnMarket || prop.expiredDom;
+    if (dom) parts.push(`${dom} days on market`);
+    const price = prop.listPrice || prop.lastListPrice;
+    if (price) parts.push(`Listed at $${Number(price).toLocaleString()}`);
+  }
+
+  const sqft = prop.squareFeet || prop.sqft || prop.buildingSize;
+  const beds = prop.bedrooms || prop.beds;
+  const baths = prop.bathrooms || prop.baths;
+  if (beds || baths) parts.push(`${beds ?? '?'}bd/${baths ?? '?'}ba${sqft ? ` · ${sqft} sqft` : ''}`);
+
+  const yr = prop.yearBuilt;
+  if (yr) parts.push(`Built ${yr}`);
+
+  return parts.join(' · ') || 'Distressed property identified via public records';
+}
+
+// ---------------------------------------------------------------------------
+// Simulated skip trace (demo — replace with real API when ANTHROPIC_API_KEY set)
+// ---------------------------------------------------------------------------
+const DEMO_OWNERS = [
+  'James Wilson', 'Maria Rodriguez', 'Robert Chen', 'Patricia Davis', 'Michael Brown',
+  'Linda Thompson', 'David Garcia', 'Susan Martinez', 'William Johnson', 'Jennifer Lee',
+  'Charles Williams', 'Karen Taylor', 'Joseph Anderson', 'Margaret Thomas', 'Richard Jackson',
+];
+
+function randomFrom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function randomPhone(): string {
+  return `(484) ${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
 }
 
 export async function simulateSkipTrace(lead: Lead): Promise<SkipTrace> {
@@ -102,11 +180,14 @@ export async function simulateSkipTrace(lead: Lead): Promise<SkipTrace> {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Simulated comps (demo)
+// ---------------------------------------------------------------------------
 export async function simulateComps(lead: Lead): Promise<Comps> {
   await new Promise(r => setTimeout(r, 2000));
   const basePrice = Math.floor(Math.random() * 100000) + 80000;
   const streets = ['Walnut St', 'Chester Ave', 'Providence Rd', 'Baltimore Pike', 'Market St', 'Highland Ave'];
-  const comps = Array.from({ length: Math.floor(Math.random() * 3) + 3 }, (_, i) => {
+  const comps = Array.from({ length: Math.floor(Math.random() * 3) + 3 }, () => {
     const price = basePrice + Math.floor((Math.random() - 0.5) * 40000);
     const months = Math.floor(Math.random() * 8) + 1;
     const d = new Date();
@@ -133,6 +214,9 @@ export async function simulateComps(lead: Lead): Promise<Comps> {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Simulated buyer finder (demo)
+// ---------------------------------------------------------------------------
 export async function simulateFindBuyers(zips: string[]): Promise<Omit<Buyer, 'id' | 'createdAt'>[]> {
   await new Promise(r => setTimeout(r, 2000));
   const types = ['flipper', 'landlord', 'developer', 'hedge_fund'] as const;
