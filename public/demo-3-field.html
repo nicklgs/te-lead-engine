@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field Command — TE Home Buyers Lead Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Barlow+Condensed:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F8F6F2;
+  --surface: #FFFFFF;
+  --navy: #1B2A4A;
+  --gold: #B8985A;
+  --red: #8B1A1A;
+  --green: #2D7A4F;
+  --muted: #6B7693;
+  --tint: #F0EDE8;
+  --border: 2px solid #1B2A4A;
+  --border-1: 1px solid #1B2A4A;
+  --font-mono: 'DM Mono', monospace;
+  --font-head: 'Barlow Condensed', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --unit: 8px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--navy);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* ─── SCROLLBARS ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--navy); }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ─── LAYOUT SHELL ──────────────────────────────────────────────────────────── */
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── HEADER ────────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border-bottom: var(--border);
+  height: 56px;
+  padding: 0 16px;
+  flex-shrink: 0;
+  gap: 24px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 16px;
+  color: #fff;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.brand-name span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.header-nav {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--navy);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: none;
+  position: relative;
+  top: 0;
+}
+
+.nav-tab:hover { background: var(--tint); }
+
+.nav-tab.active {
+  background: var(--navy);
+  color: #fff;
+  border-bottom: 2px solid var(--navy);
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.lead-count {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--navy);
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--green);
+  letter-spacing: 0.05em;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.gear-btn {
+  width: 32px;
+  height: 32px;
+  border: var(--border-1);
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  font-size: 16px;
+  transition: background 0.1s;
+}
+.gear-btn:hover { background: var(--tint); }
+
+/* ─── ALERT STRIP ───────────────────────────────────────────────────────────── */
+.alert-strip {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border-bottom: var(--border-1);
+  border-left: 4px solid var(--red);
+  padding: 0 16px;
+  height: 36px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.alert-strip.dismissed { display: none; }
+
+.alert-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--red);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.alert-msg {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--navy);
+  flex: 1;
+}
+
+.alert-dismiss {
+  width: 24px;
+  height: 24px;
+  border: var(--border-1);
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.alert-dismiss:hover { background: var(--navy); color: #fff; }
+
+/* ─── STATS ROW ─────────────────────────────────────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  background: var(--surface);
+  border-bottom: var(--border);
+  flex-shrink: 0;
+}
+
+.stat-block {
+  padding: 12px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+}
+
+.stat-block + .stat-block::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--navy);
+}
+
+.stat-num {
+  font-family: var(--font-mono);
+  font-size: 52px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--navy);
+  letter-spacing: -2px;
+}
+
+.stat-num.red { color: var(--red); }
+.stat-num.gold { color: var(--gold); }
+
+.stat-label {
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.stat-hot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: pulse-red 1.5s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(139,26,26,0.4); }
+  50% { opacity: 0.8; transform: scale(1.1); box-shadow: 0 0 0 4px rgba(139,26,26,0); }
+}
+
+/* ─── MAIN AREA ─────────────────────────────────────────────────────────────── */
+.main-area {
+  display: grid;
+  grid-template-columns: 65% 35%;
+  flex: 1;
+  overflow: hidden;
+  border-top: none;
+}
+
+/* ─── LEFT PANEL ────────────────────────────────────────────────────────────── */
+.left-panel {
+  border-right: var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 0;
+  background: var(--surface);
+  border-bottom: var(--border);
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--navy);
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--navy);
+}
+
+.sub-tabs {
+  display: flex;
+  gap: 0;
+  padding-bottom: 0;
+}
+
+.sub-tab {
+  padding: 8px 16px;
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: var(--border-1);
+  border-bottom: none;
+  background: var(--bg);
+  color: var(--muted);
+  margin-bottom: -1px;
+}
+
+.sub-tab.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+.sub-tab:hover:not(.active) { background: var(--tint); color: var(--navy); }
+
+/* ─── KANBAN ────────────────────────────────────────────────────────────────── */
+.kanban-view {
+  display: none;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.kanban-view.active { display: flex; }
+
+.kanban-columns {
+  display: flex;
+  height: 100%;
+  min-width: 100%;
+}
+
+.kanban-col {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  border-right: var(--border-1);
+  overflow: hidden;
+}
+
+.kanban-col:last-child { border-right: none; }
+
+.kanban-col-header {
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: var(--border-1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.col-stage {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+
+.col-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--tint);
+  padding: 1px 6px;
+  border: var(--border-1);
+}
+
+.kanban-col-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.kanban-row {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(27,42,74,0.12);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.1s;
+}
+
+.kanban-row:hover { background: var(--tint); }
+.kanban-row.selected { background: var(--navy); }
+.kanban-row.selected * { color: #fff !important; border-color: rgba(255,255,255,0.3) !important; }
+.kanban-row.selected .score-bar-fill { background: rgba(255,255,255,0.5) !important; }
+
+.kanban-row-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-badge {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--navy);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.score-bar {
+  width: 32px;
+  height: 4px;
+  background: rgba(27,42,74,0.15);
+  flex-shrink: 0;
+}
+
+.score-bar-fill {
+  height: 100%;
+  background: var(--navy);
+}
+
+.kanban-addr {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.kanban-row-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cat-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--navy);
+  border: 1px solid var(--navy);
+  padding: 1px 4px;
+  white-space: nowrap;
+  border-radius: 0;
+}
+
+.temp-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.temp-tag.hot { color: var(--red); }
+.temp-tag.warm { color: #B05A00; }
+.temp-tag.cool { color: #2456A0; }
+
+.indicators {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+
+.ind-check { color: var(--green); }
+.ind-dash { color: rgba(27,42,74,0.25); }
+
+.overdue-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--red);
+}
+
+/* ─── TABLE VIEW ────────────────────────────────────────────────────────────── */
+.table-view {
+  display: none;
+  flex: 1;
+  overflow: hidden;
+  flex-direction: column;
+}
+.table-view.active { display: flex; }
+
+.data-table-wrap {
+  flex: 1;
+  overflow: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.data-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface);
+}
+
+.data-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: var(--border);
+  border-right: 1px solid rgba(27,42,74,0.15);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.data-table th:hover { background: var(--tint); color: var(--navy); }
+.data-table th:last-child { border-right: none; }
+
+.sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 9px;
+  opacity: 0.4;
+}
+.sort-arrow.asc::after { content: '▲'; }
+.sort-arrow.desc::after { content: '▼'; }
+.sort-arrow.active { opacity: 1; }
+
+.data-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(27,42,74,0.1);
+  border-right: 1px solid rgba(27,42,74,0.08);
+  vertical-align: middle;
+}
+.data-table td:last-child { border-right: none; }
+
+.data-table tbody tr { cursor: pointer; }
+.data-table tbody tr:nth-child(even) { background: var(--tint); }
+.data-table tbody tr:hover { background: var(--navy) !important; }
+.data-table tbody tr:hover td { color: #fff !important; }
+.data-table tbody tr:hover .score-bar { background: rgba(255,255,255,0.2); }
+.data-table tbody tr:hover .score-bar-fill { background: rgba(255,255,255,0.7); }
+.data-table tbody tr:hover .cat-tag { color: #fff; border-color: rgba(255,255,255,0.4); }
+.data-table tbody tr:hover .temp-tag { color: #fff !important; }
+.data-table tbody tr.selected { background: rgba(27,42,74,0.08) !important; }
+.data-table tbody tr.selected td { border-left: 2px solid var(--gold); }
+
+.score-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.score-num {
+  font-weight: 500;
+  width: 24px;
+}
+
+.tier-label {
+  font-size: 10px;
+  font-family: var(--font-head);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.tier-label.hot { color: var(--red); }
+.tier-label.warm { color: #B05A00; }
+.tier-label.cool { color: #2456A0; }
+
+.view-btn {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: var(--border-1);
+  background: none;
+  color: var(--navy);
+  cursor: pointer;
+}
+.view-btn:hover { background: var(--navy); color: #fff; }
+
+/* ─── RIGHT PANEL ───────────────────────────────────────────────────────────── */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.detail-header {
+  padding: 16px;
+  border-bottom: var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.detail-score-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.detail-score {
+  font-family: var(--font-mono);
+  font-size: 56px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--navy);
+  letter-spacing: -2px;
+}
+
+.detail-score.hot-score { color: var(--red); }
+.detail-score.gold-accent { color: var(--gold); }
+
+.score-tier-badge {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  margin-bottom: 8px;
+}
+.score-tier-badge.hot { background: var(--red); color: #fff; }
+.score-tier-badge.warm { background: #B05A00; color: #fff; }
+.score-tier-badge.cool { background: #2456A0; color: #fff; }
+
+.detail-address {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--navy);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.detail-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.detail-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--navy);
+  border: 1px solid var(--navy);
+  padding: 2px 6px;
+}
+
+/* ─── DETAIL TABS ───────────────────────────────────────────────────────────── */
+.detail-tabs {
+  display: flex;
+  border-bottom: var(--border);
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+.detail-tab {
+  flex: 1;
+  padding: 8px 4px;
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  border-right: 1px solid var(--navy);
+  background: var(--bg);
+  color: var(--muted);
+  text-align: center;
+}
+
+.detail-tab:last-child { border-right: none; }
+.detail-tab:hover:not(.active) { background: var(--tint); color: var(--navy); }
+.detail-tab.active { background: var(--navy); color: #fff; }
+
+/* ─── DETAIL CONTENT ────────────────────────────────────────────────────────── */
+.detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.detail-pane { display: none; padding: 12px 16px; }
+.detail-pane.active { display: block; }
+
+/* KV Table */
+.kv-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.kv-table tr { border-bottom: 1px solid rgba(27,42,74,0.1); }
+.kv-table tr:last-child { border-bottom: none; }
+
+.kv-table td {
+  padding: 5px 0;
+  vertical-align: top;
+  font-size: 12px;
+}
+
+.kv-key {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  width: 120px;
+  white-space: nowrap;
+  padding-right: 12px;
+}
+
+.kv-val {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--navy);
+}
+
+.kv-val.mono { font-family: var(--font-mono); }
+
+/* Section heading in detail */
+.detail-section-head {
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 2px solid var(--navy);
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+  margin-top: 14px;
+}
+
+.detail-section-head:first-child { margin-top: 0; }
+
+/* Skip pane */
+.skip-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.skip-table tr { border-bottom: 1px solid rgba(27,42,74,0.1); }
+.skip-table td { padding: 6px 4px; font-family: var(--font-mono); font-size: 12px; vertical-align: middle; }
+
+.lookup-btn {
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: var(--border-1);
+  background: none;
+  color: var(--navy);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lookup-btn:hover { background: var(--navy); color: #fff; }
+
+/* Comps pane */
+.arv-display {
+  text-align: center;
+  padding: 16px 0 12px;
+  border-bottom: 1px solid rgba(27,42,74,0.15);
+  margin-bottom: 12px;
+}
+
+.arv-label {
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.arv-value {
+  font-family: var(--font-mono);
+  font-size: 40px;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.comp-table th {
+  font-family: var(--font-head);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 4px 6px;
+  border-bottom: var(--border-1);
+  text-align: left;
+}
+
+.comp-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid rgba(27,42,74,0.08);
+  color: var(--navy);
+}
+
+.comp-table tr:hover td { background: var(--tint); }
+
+/* CRM pane */
+.stage-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border: var(--border-1);
+  margin-bottom: 14px;
+}
+
+.stage-btn {
+  flex: 1;
+  min-width: 60px;
+  padding: 6px 4px;
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  border-right: 1px solid var(--navy);
+  background: none;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stage-btn:last-child { border-right: none; }
+.stage-btn:hover:not(.active) { background: var(--tint); color: var(--navy); }
+.stage-btn.active { background: var(--navy); color: #fff; }
+
+.followup-row {
+  display: flex;
+  gap: 0;
+  margin-bottom: 14px;
+  border: var(--border-1);
+}
+
+.followup-label {
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 10px;
+  background: var(--tint);
+  border-right: var(--border-1);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.followup-input {
+  flex: 1;
+  border: none;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--navy);
+  background: var(--surface);
+  outline: none;
+}
+
+.followup-input:focus { background: var(--tint); }
+
+.activity-log {
+  border: var(--border-1);
+}
+
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(27,42,74,0.1);
+}
+
+.activity-item:last-child { border-bottom: none; }
+
+.activity-ts {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 110px;
+}
+
+.activity-txt {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--navy);
+}
+
+/* Offer pane */
+.offer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: var(--border-1);
+  margin-bottom: 16px;
+}
+
+.offer-field {
+  display: flex;
+  flex-direction: column;
+  border-right: var(--border-1);
+  border-bottom: var(--border-1);
+}
+
+.offer-field:nth-child(2),
+.offer-field:nth-child(4) { border-right: none; }
+.offer-field:nth-child(3),
+.offer-field:nth-child(4) { border-bottom: none; }
+
+.offer-label {
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 5px 10px 3px;
+  background: var(--tint);
+  border-bottom: 1px solid rgba(27,42,74,0.15);
+}
+
+.offer-input {
+  border: none;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--navy);
+  background: var(--surface);
+  outline: none;
+  width: 100%;
+}
+
+.offer-input:focus { background: var(--tint); }
+
+.offer-result {
+  border: 2px solid var(--gold);
+  padding: 16px;
+  text-align: center;
+  position: relative;
+}
+
+.offer-result::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gold);
+}
+
+.offer-result-label {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.offer-result-value {
+  font-family: var(--font-mono);
+  font-size: 44px;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.offer-notes {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ─── SECTION HEAD with gold accent ─────────────────────────────────────────── */
+.gold-accent-line {
+  border-left: 3px solid var(--gold);
+  padding-left: 8px;
+}
+
+/* ─── PRINT-LIKE DIVIDERS ───────────────────────────────────────────────────── */
+hr.thick { border: none; border-top: var(--border); margin: 16px 0; }
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ═══ HEADER ═════════════════════════════════════════════════════════════ -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="brand-mark">TE</div>
+      <div class="brand-name">HOME BUYERS <span>//</span> LEAD ENGINE</div>
+    </div>
+
+    <nav class="header-nav">
+      <button class="nav-tab active" onclick="setNavTab(this,'DASHBOARD')">DASHBOARD</button>
+      <button class="nav-tab" onclick="setNavTab(this,'LEADS')">LEADS</button>
+      <button class="nav-tab" onclick="setNavTab(this,'SCRUB')">SCRUB</button>
+      <button class="nav-tab" onclick="setNavTab(this,'BUYERS')">BUYERS</button>
+      <button class="nav-tab" onclick="setNavTab(this,'ADD')">+ ADD</button>
+    </nav>
+
+    <div class="header-status">
+      <span class="lead-count">08 LEADS</span>
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
+      <button class="gear-btn" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 10a2 2 0 100-4 2 2 0 000 4z" fill="currentColor"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M6.56 1.27a1.5 1.5 0 012.88 0l.19.65a5.5 5.5 0 011.04.6l.66-.17a1.5 1.5 0 011.85 1.85l-.17.66c.24.32.44.67.6 1.04l.65.19a1.5 1.5 0 010 2.88l-.65.19a5.5 5.5 0 01-.6 1.04l.17.66a1.5 1.5 0 01-1.85 1.85l-.66-.17a5.5 5.5 0 01-1.04.6l-.19.65a1.5 1.5 0 01-2.88 0l-.19-.65a5.5 5.5 0 01-1.04-.6l-.66.17a1.5 1.5 0 01-1.85-1.85l.17-.66a5.5 5.5 0 01-.6-1.04l-.65-.19a1.5 1.5 0 010-2.88l.65-.19c.16-.37.36-.72.6-1.04l-.17-.66a1.5 1.5 0 011.85-1.85l.66.17c.32-.23.67-.44 1.04-.6l.19-.65zm1.44.5a.5.5 0 00-.96 0l-.28.97-.28.1a4.5 4.5 0 00-.85.49l-.25.18-.97-.25a.5.5 0 00-.62.62l.25.97-.18.25a4.5 4.5 0 00-.49.85l-.1.28-.97.28a.5.5 0 000 .96l.97.28.1.28c.12.3.28.59.49.85l.18.25-.25.97a.5.5 0 00.62.62l.97-.25.25.18c.26.2.55.37.85.49l.28.1.28.97a.5.5 0 00.96 0l.28-.97.28-.1c.3-.12.59-.28.85-.49l.25-.18.97.25a.5.5 0 00.62-.62l-.25-.97.18-.25a4.5 4.5 0 00.49-.85l.1-.28.97-.28a.5.5 0 000-.96l-.97-.28-.1-.28a4.5 4.5 0 00-.49-.85l-.18-.25.25-.97a.5.5 0 00-.62-.62l-.97.25-.25-.18a4.5 4.5 0 00-.85-.49l-.28-.1-.28-.97z" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ ALERT STRIP ═════════════════════════════════════════════════════════ -->
+  <div class="alert-strip" id="alertStrip">
+    <span class="alert-tag">! OVERDUE</span>
+    <span class="alert-msg">120 Lansdowne Ave — Expired Listing — Follow-up: 01 APR 2026</span>
+    <button class="alert-dismiss" onclick="document.getElementById('alertStrip').classList.add('dismissed')">×</button>
+  </div>
+
+  <!-- ═══ STATS ROW ════════════════════════════════════════════════════════════ -->
+  <div class="stats-row">
+    <div class="stat-block">
+      <div class="stat-num">08</div>
+      <div class="stat-label">Total Leads</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-hot">
+        <div class="stat-num red">02</div>
+        <div class="pulse-dot" style="margin-top:4px;"></div>
+      </div>
+      <div class="stat-label">Hot Leads</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num gold">$166K</div>
+      <div class="stat-label">Pipeline Value</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num">46</div>
+      <div class="stat-label">Avg Score</div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN ═══════════════════════════════════════════════════════════════ -->
+  <div class="main-area">
+
+    <!-- ── LEFT ──────────────────────────────────────────────────────────── -->
+    <div class="left-panel">
+      <div class="panel-header">
+        <span class="panel-title">Pipeline View</span>
+        <div class="sub-tabs">
+          <button class="sub-tab active" id="tabKanban" onclick="switchSubTab('kanban')">Kanban</button>
+          <button class="sub-tab" id="tabTable" onclick="switchSubTab('table')">Table</button>
+        </div>
+      </div>
+
+      <!-- KANBAN -->
+      <div class="kanban-view active" id="kanbanView">
+        <div class="kanban-columns" id="kanbanColumns"></div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-view" id="tableView">
+        <div class="data-table-wrap">
+          <table class="data-table" id="dataTable">
+            <thead>
+              <tr>
+                <th onclick="sortTable('score')">SCORE <span class="sort-arrow desc active" id="sort-score"></span></th>
+                <th onclick="sortTable('address')">ADDRESS <span class="sort-arrow" id="sort-address"></span></th>
+                <th onclick="sortTable('category')">CATEGORY <span class="sort-arrow" id="sort-category"></span></th>
+                <th onclick="sortTable('stage')">STAGE <span class="sort-arrow" id="sort-stage"></span></th>
+                <th onclick="sortTable('followup')">FOLLOW-UP <span class="sort-arrow" id="sort-followup"></span></th>
+                <th onclick="sortTable('data')">DATA <span class="sort-arrow" id="sort-data"></span></th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT ─────────────────────────────────────────────────────────── -->
+    <div class="right-panel">
+      <div class="detail-header">
+        <div class="detail-score-row">
+          <div class="detail-score" id="detailScore">73</div>
+          <div class="score-tier-badge warm" id="detailTierBadge">WARM</div>
+        </div>
+        <div class="detail-address" id="detailAddress">412 W 3RD ST, CHESTER 19013</div>
+        <div class="detail-tags" id="detailTags">
+          <span class="detail-tag">PRE-FORECLOSURE</span>
+          <span class="detail-tag">TAX</span>
+        </div>
+      </div>
+
+      <div class="detail-tabs">
+        <button class="detail-tab active" onclick="switchDetailTab('info')">INFO</button>
+        <button class="detail-tab" onclick="switchDetailTab('skip')">SKIP</button>
+        <button class="detail-tab" onclick="switchDetailTab('comps')">COMPS</button>
+        <button class="detail-tab" onclick="switchDetailTab('crm')">CRM</button>
+        <button class="detail-tab" onclick="switchDetailTab('offer')">OFFER</button>
+      </div>
+
+      <div class="detail-content">
+
+        <!-- INFO -->
+        <div class="detail-pane active" id="pane-info">
+          <div class="detail-section-head gold-accent-line">Property</div>
+          <table class="kv-table" id="kvPropertyTable"></table>
+          <div class="detail-section-head" style="margin-top:12px;">Lead Source</div>
+          <table class="kv-table" id="kvSourceTable"></table>
+          <div class="detail-section-head" style="margin-top:12px;">Flags</div>
+          <table class="kv-table" id="kvFlagsTable"></table>
+        </div>
+
+        <!-- SKIP -->
+        <div class="detail-pane" id="pane-skip">
+          <div class="detail-section-head gold-accent-line">Owner</div>
+          <table class="skip-table" id="skipOwnerTable"></table>
+          <div class="detail-section-head" style="margin-top:12px;">Contact Info</div>
+          <table class="skip-table" id="skipContactTable"></table>
+        </div>
+
+        <!-- COMPS -->
+        <div class="detail-pane" id="pane-comps">
+          <div class="arv-display">
+            <div class="arv-label">After Repair Value (ARV)</div>
+            <div class="arv-value" id="arvValue">$127,000</div>
+          </div>
+          <div class="detail-section-head">Comparable Sales</div>
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>ADDRESS</th>
+                <th>SQFT</th>
+                <th>SOLD</th>
+                <th>$/SQFT</th>
+                <th>DATE</th>
+              </tr>
+            </thead>
+            <tbody id="compTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- CRM -->
+        <div class="detail-pane" id="pane-crm">
+          <div class="detail-section-head gold-accent-line">Stage</div>
+          <div class="stage-row" id="stageRow">
+            <button class="stage-btn" onclick="setStage(this,'NEW')">NEW</button>
+            <button class="stage-btn active" onclick="setStage(this,'CONTACTED')">CONTACTED</button>
+            <button class="stage-btn" onclick="setStage(this,'APPT')">APPT</button>
+            <button class="stage-btn" onclick="setStage(this,'OFFER')">OFFER</button>
+            <button class="stage-btn" onclick="setStage(this,'CONTRACT')">CONTRACT</button>
+            <button class="stage-btn" onclick="setStage(this,'CLOSED')">CLOSED</button>
+            <button class="stage-btn" onclick="setStage(this,'DEAD')">DEAD</button>
+          </div>
+
+          <div class="detail-section-head">Follow-Up Date</div>
+          <div class="followup-row">
+            <span class="followup-label">DATE</span>
+            <input type="date" class="followup-input" id="followupDate" value="2026-04-08">
+          </div>
+
+          <div class="detail-section-head">Activity Log</div>
+          <div class="activity-log" id="activityLog"></div>
+        </div>
+
+        <!-- OFFER -->
+        <div class="detail-pane" id="pane-offer">
+          <div class="detail-section-head gold-accent-line">Offer Calculator</div>
+          <div class="offer-grid">
+            <div class="offer-field">
+              <div class="offer-label">ARV ($)</div>
+              <input type="number" class="offer-input" id="offerArv" value="127000" oninput="calcOffer()">
+            </div>
+            <div class="offer-field">
+              <div class="offer-label">Repairs ($)</div>
+              <input type="number" class="offer-input" id="offerRepairs" value="35000" oninput="calcOffer()">
+            </div>
+            <div class="offer-field">
+              <div class="offer-label">Margin (%)</div>
+              <input type="number" class="offer-input" id="offerMargin" value="70" oninput="calcOffer()">
+            </div>
+            <div class="offer-field">
+              <div class="offer-label">Profit ($)</div>
+              <input type="number" class="offer-input" id="offerProfit" value="10000" oninput="calcOffer()">
+            </div>
+          </div>
+
+          <div class="offer-result">
+            <div class="offer-result-label">Max Allowable Offer</div>
+            <div class="offer-result-value" id="offerResult">$...</div>
+          </div>
+          <div class="offer-notes" id="offerNotes"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════════════════════ */
+const LEADS = [
+  {
+    id: 1,
+    address: '412 W 3rd St, Chester 19013',
+    addrShort: '412 W 3rd St',
+    zip: '19013',
+    city: 'Chester',
+    category: ['Pre-Foreclosure','Tax'],
+    catTags: ['PRE-FORE','TAX'],
+    score: 73,
+    tier: 'WARM',
+    stage: 'Contacted',
+    followup: '2026-04-08',
+    skip: true, comps: true, offer: true,
+    overdue: false,
+    arv: 127000,
+    repairs: 35000,
+    info: {
+      property: [
+        ['Type','Rowhouse / SFR'],
+        ['Sqft','1,240'],
+        ['Beds/Baths','3 BD / 1.5 BA'],
+        ['Year Built','1948'],
+        ['Lot Size','1,800 sqft'],
+        ['County','Delaware'],
+        ['APN','08-00-01234-00'],
+        ['Zoning','R-3 Residential'],
+      ],
+      source: [
+        ['Category','Pre-Foreclosure + Tax'],
+        ['List Date','15 FEB 2026'],
+        ['Days Listed','46'],
+        ['Tax Delinq.','$4,812 (2 yrs)'],
+        ['Lis Pendens','Filed 22 JAN 2026'],
+      ],
+      flags: [
+        ['Vacant','Likely'],
+        ['Code Viol.','None on file'],
+        ['Liens','Tax + Mortgage'],
+        ['Lead Priority','HIGH'],
+      ]
+    },
+    skip_data: {
+      owner: [['Name','JAMES T. HARRIS'],['Mailing Addr','1902 Walnut St, Phila PA 19103'],['Ownership','Since 2009 (17 yrs)']],
+      contact: [['Cell','(610) 555-0142'],['Alt Phone','(610) 555-0189'],['Email','jharris@gmail.com'],['Last Contact','28 MAR 2026']],
+    },
+    comps: [
+      {addr:'418 W 3rd St',sqft:1180,sold:'$114,000',psf:'$96.61',date:'12 FEB 26'},
+      {addr:'406 W 4th St',sqft:1260,sold:'$129,500',psf:'$102.78',date:'03 DEC 25'},
+      {addr:'501 W 2nd St',sqft:1200,sold:'$122,000',psf:'$101.67',date:'18 OCT 25'},
+      {addr:'334 W 3rd St',sqft:1100,sold:'$108,000',psf:'$98.18',date:'04 SEP 25'},
+    ],
+    activity: [
+      {ts:'28 MAR 26 14:22','txt':'Left voicemail — no answer'},
+      {ts:'22 MAR 26 10:05','txt':'Cold call attempt #2 — busy signal'},
+      {ts:'15 MAR 26 09:00','txt':'Lead imported — Pre-Fore + Tax flag'},
+      {ts:'15 MAR 26 09:01','txt':'Skip trace completed'},
+    ],
+    crmStage: 'CONTACTED',
+  },
+  {
+    id: 2,
+    address: '1025 Morton Ave, Chester 19013',
+    addrShort: '1025 Morton Ave',
+    zip: '19013',
+    city: 'Chester',
+    category: ['Tax','Vacant'],
+    catTags: ['TAX','VACANT'],
+    score: 67,
+    tier: 'WARM',
+    stage: 'New',
+    followup: '2026-04-10',
+    skip: false, comps: false, offer: false,
+    overdue: false,
+    arv: 98000,
+    repairs: 28000,
+    info: {
+      property: [
+        ['Type','Rowhouse / SFR'],['Sqft','1,080'],['Beds/Baths','3 BD / 1 BA'],
+        ['Year Built','1952'],['Lot Size','1,440 sqft'],['County','Delaware'],
+        ['APN','08-00-05678-00'],['Zoning','R-3 Residential'],
+      ],
+      source: [
+        ['Category','Tax + Vacant'],['List Date','02 MAR 2026'],['Days Listed','31'],
+        ['Tax Delinq.','$6,120 (3 yrs)'],['Utility Status','Disconnected'],
+      ],
+      flags: [['Vacant','Confirmed'],['Code Viol.','Open (2021)'],['Liens','Tax only'],['Lead Priority','MEDIUM']]
+    },
+    skip_data: {
+      owner: [['Name','ESTATE OF M. WILSON'],['Mailing Addr','Unknown'],['Ownership','Since 1999 (27 yrs)']],
+      contact: [['Cell','—'],['Alt Phone','—'],['Email','—'],['Last Contact','Never']],
+    },
+    comps: [
+      {addr:'1031 Morton Ave',sqft:1020,sold:'$91,000',psf:'$89.22',date:'08 JAN 26'},
+      {addr:'1018 Morton Ave',sqft:1100,sold:'$99,500',psf:'$90.45',date:'15 NOV 25'},
+    ],
+    activity: [
+      {ts:'02 MAR 26 08:00','txt':'Lead imported — Tax + Vacant flag'},
+    ],
+    crmStage: 'NEW',
+  },
+  {
+    id: 3,
+    address: '227 Pine St, Darby 19023',
+    addrShort: '227 Pine St',
+    zip: '19023',
+    city: 'Darby',
+    category: ['Probate'],
+    catTags: ['PROBATE'],
+    score: 33,
+    tier: 'COOL',
+    stage: 'Appt',
+    followup: '2026-04-14',
+    skip: true, comps: true, offer: false,
+    overdue: false,
+    arv: 145000,
+    repairs: 22000,
+    info: {
+      property: [
+        ['Type','Twin / SFR'],['Sqft','1,640'],['Beds/Baths','4 BD / 2 BA'],
+        ['Year Built','1935'],['Lot Size','3,200 sqft'],['County','Delaware'],
+        ['APN','11-00-02233-00'],['Zoning','R-2 Residential'],
+      ],
+      source: [
+        ['Category','Probate'],['Filed','22 JAN 2026'],['Decedent','Martha P. Collins'],
+        ['Estate Atty','Simmons & Reeve'],['Court','Del. County Orphans Ct.'],
+      ],
+      flags: [['Vacant','Unknown'],['Code Viol.','None'],['Liens','None known'],['Lead Priority','LOW']]
+    },
+    skip_data: {
+      owner: [['Name','ESTATE OF M. COLLINS'],['Mailing Addr','227 Pine St, Darby PA 19023'],['Ownership','Since 1978 (48 yrs)']],
+      contact: [['Cell','(610) 555-0234'],['Alt Phone','(610) 555-0278'],['Email','tcollins@outlook.com'],['Last Contact','10 APR 2026']],
+    },
+    comps: [
+      {addr:'231 Pine St',sqft:1600,sold:'$139,000',psf:'$86.88',date:'22 FEB 26'},
+      {addr:'218 Pine St',sqft:1700,sold:'$148,000',psf:'$87.06',date:'10 JAN 26'},
+      {addr:'302 Maple Ave',sqft:1580,sold:'$141,500',psf:'$89.56',date:'05 DEC 25'},
+    ],
+    activity: [
+      {ts:'10 APR 26 11:00','txt':'Appt set with executor Tom Collins'},
+      {ts:'29 MAR 26 14:30','txt':'Called estate attorney — confirmed interest'},
+      {ts:'22 JAN 26 09:00','txt':'Probate filing detected — lead created'},
+    ],
+    crmStage: 'APPT',
+  },
+  {
+    id: 4,
+    address: '6820 Market St, Upper Darby 19082',
+    addrShort: '6820 Market St',
+    zip: '19082',
+    city: 'Upper Darby',
+    category: ['Code Viol.','Vacant'],
+    catTags: ['CODE','VACANT'],
+    score: 53,
+    tier: 'WARM',
+    stage: 'New',
+    followup: '2026-04-12',
+    skip: false, comps: false, offer: false,
+    overdue: false,
+    arv: 112000,
+    repairs: 42000,
+    info: {
+      property: [
+        ['Type','Rowhouse / SFR'],['Sqft','1,100'],['Beds/Baths','3 BD / 1 BA'],
+        ['Year Built','1942'],['Lot Size','1,600 sqft'],['County','Delaware'],
+        ['APN','14-00-07891-00'],['Zoning','C-2 Mixed'],
+      ],
+      source: [
+        ['Category','Code Viol. + Vacant'],['Violation Date','08 NOV 2025'],
+        ['Violation','Structural — Roof/Facade'],['Inspector','Twp. Code Enforcement'],
+        ['Fine','$1,800 outstanding'],
+      ],
+      flags: [['Vacant','Confirmed'],['Code Viol.','Open — Structural'],['Liens','Municipal'],['Lead Priority','MEDIUM']]
+    },
+    skip_data: {
+      owner: [['Name','CHEN PROPERTY LLC'],['Mailing Addr','PO Box 1102, Ardmore PA 19003'],['Ownership','Since 2014 (12 yrs)']],
+      contact: [['Cell','—'],['Alt Phone','(484) 555-0312'],['Email','—'],['Last Contact','Never']],
+    },
+    comps: [
+      {addr:'6814 Market St',sqft:1080,sold:'$104,000',psf:'$96.30',date:'14 MAR 26'},
+      {addr:'6835 Market St',sqft:1150,sold:'$116,000',psf:'$100.87',date:'02 FEB 26'},
+    ],
+    activity: [
+      {ts:'20 MAR 26 09:00','txt':'Lead imported — Code + Vacant flag'},
+    ],
+    crmStage: 'NEW',
+  },
+  {
+    id: 5,
+    address: '740 Burmont Rd, Drexel Hill 19026',
+    addrShort: '740 Burmont Rd',
+    zip: '19026',
+    city: 'Drexel Hill',
+    category: ['Divorce'],
+    catTags: ['DIVORCE'],
+    score: 78,
+    tier: 'HOT',
+    stage: 'Offer Made',
+    followup: '2026-04-05',
+    skip: true, comps: true, offer: true,
+    overdue: false,
+    arv: 198000,
+    repairs: 18000,
+    info: {
+      property: [
+        ['Type','Detached / SFR'],['Sqft','2,100'],['Beds/Baths','4 BD / 2.5 BA'],
+        ['Year Built','1968'],['Lot Size','7,200 sqft'],['County','Delaware'],
+        ['APN','22-00-04455-00'],['Zoning','R-1 Residential'],
+      ],
+      source: [
+        ['Category','Divorce'],['Filing Date','14 JAN 2026'],['Case No.','2026-DR-00441'],
+        ['Court','Del. County Common Pleas'],['Atty (P)','Goldstein & Associates'],
+      ],
+      flags: [['Vacant','No'],['Code Viol.','None'],['Liens','Mortgage only'],['Lead Priority','HIGH']]
+    },
+    skip_data: {
+      owner: [['Name','RYAN & SARAH NOVAK'],['Mailing Addr','740 Burmont Rd, Drexel Hill PA 19026'],['Ownership','Since 2011 (15 yrs)']],
+      contact: [['Cell (R)','(610) 555-0501'],['Cell (S)','(610) 555-0544'],['Email','r.novak@gmail.com'],['Last Contact','01 APR 2026']],
+    },
+    comps: [
+      {addr:'732 Burmont Rd',sqft:2050,sold:'$191,000',psf:'$93.17',date:'18 MAR 26'},
+      {addr:'748 Burmont Rd',sqft:2200,sold:'$205,000',psf:'$93.18',date:'08 FEB 26'},
+      {addr:'825 Burmont Rd',sqft:1980,sold:'$186,500',psf:'$94.19',date:'22 DEC 25'},
+      {addr:'710 Brentwood Rd',sqft:2080,sold:'$194,000',psf:'$93.27',date:'10 NOV 25'},
+    ],
+    activity: [
+      {ts:'01 APR 26 16:00','txt':'Verbal offer presented — $141K. Awaiting response.'},
+      {ts:'28 MAR 26 10:30','txt':'Walkthrough completed — repairs est. $18K'},
+      {ts:'22 MAR 26 14:00','txt':'Met with Ryan — motivated, wants quick close'},
+      {ts:'14 JAN 26 09:00','txt':'Divorce filing detected — lead created'},
+    ],
+    crmStage: 'OFFER',
+  },
+  {
+    id: 6,
+    address: '120 Lansdowne Ave, Lansdowne 19050',
+    addrShort: '120 Lansdowne Ave',
+    zip: '19050',
+    city: 'Lansdowne',
+    category: ['Expired'],
+    catTags: ['EXPIRED'],
+    score: 32,
+    tier: 'COOL',
+    stage: 'Contacted',
+    followup: '2026-04-01',
+    skip: true, comps: false, offer: false,
+    overdue: true,
+    arv: 135000,
+    repairs: 25000,
+    info: {
+      property: [
+        ['Type','Twin / SFR'],['Sqft','1,380'],['Beds/Baths','3 BD / 2 BA'],
+        ['Year Built','1929'],['Lot Size','2,600 sqft'],['County','Delaware'],
+        ['APN','19-00-09988-00'],['Zoning','R-2 Residential'],
+      ],
+      source: [
+        ['Category','Expired Listing'],['MLS','BRIGHT #DE-224498'],['Listed','180 days at $162K'],
+        ['Expired','31 MAR 2026'],['Listing Agent','Donna Wells, Century 21'],
+      ],
+      flags: [['Vacant','No'],['Code Viol.','None'],['Liens','Mortgage only'],['Lead Priority','LOW']]
+    },
+    skip_data: {
+      owner: [['Name','PATRICIA R. MORAN'],['Mailing Addr','120 Lansdowne Ave, Lansdowne PA 19050'],['Ownership','Since 2001 (25 yrs)']],
+      contact: [['Cell','(610) 555-0612'],['Alt Phone','(610) 555-0677'],['Email','pmoran@yahoo.com'],['Last Contact','28 MAR 2026']],
+    },
+    comps: [
+      {addr:'116 Lansdowne Ave',sqft:1340,sold:'$128,000',psf:'$95.52',date:'05 JAN 26'},
+      {addr:'124 Lansdowne Ave',sqft:1400,sold:'$134,000',psf:'$95.71',date:'10 NOV 25'},
+    ],
+    activity: [
+      {ts:'28 MAR 26 12:00','txt':'Spoke with Patricia — not ready yet. Follow up Apr 1.'},
+      {ts:'01 APR 26 09:00','txt':'! OVERDUE — follow-up not completed'},
+      {ts:'31 MAR 26 00:00','txt':'Listing expired on MLS — auto-flagged'},
+    ],
+    crmStage: 'CONTACTED',
+  },
+  {
+    id: 7,
+    address: '301 Long Ln, Upper Darby 19082',
+    addrShort: '301 Long Ln',
+    zip: '19082',
+    city: 'Upper Darby',
+    category: ['FSBO'],
+    catTags: ['FSBO'],
+    score: 28,
+    tier: 'COOL',
+    stage: 'New',
+    followup: '2026-04-15',
+    skip: false, comps: false, offer: false,
+    overdue: false,
+    arv: 108000,
+    repairs: 12000,
+    info: {
+      property: [
+        ['Type','Rowhouse / SFR'],['Sqft','1,020'],['Beds/Baths','3 BD / 1 BA'],
+        ['Year Built','1958'],['Lot Size','1,200 sqft'],['County','Delaware'],
+        ['APN','14-00-03312-00'],['Zoning','R-3 Residential'],
+      ],
+      source: [
+        ['Category','FSBO'],['Platform','Facebook Marketplace'],['Asking','$119,000'],
+        ['Listed','21 MAR 2026'],['Days on Market','12'],
+      ],
+      flags: [['Vacant','No'],['Code Viol.','None'],['Liens','Mortgage only'],['Lead Priority','LOW']]
+    },
+    skip_data: {
+      owner: [['Name','DEREK A. BANKS'],['Mailing Addr','301 Long Ln, Upper Darby PA 19082'],['Ownership','Since 2016 (10 yrs)']],
+      contact: [['Cell','—'],['Alt Phone','—'],['Email','—'],['Last Contact','Never']],
+    },
+    comps: [{addr:'298 Long Ln',sqft:1000,sold:'$101,000',psf:'$101.00',date:'15 FEB 26'}],
+    activity: [{ts:'21 MAR 26 10:00','txt':'FSBO spotted on Facebook Marketplace — lead created'}],
+    crmStage: 'NEW',
+  },
+  {
+    id: 8,
+    address: '534 Oak Ln, Darby 19023',
+    addrShort: '534 Oak Ln',
+    zip: '19023',
+    city: 'Darby',
+    category: ['Vacant','Tax'],
+    catTags: ['VACANT','TAX'],
+    score: 40,
+    tier: 'COOL',
+    stage: 'New',
+    followup: '2026-04-18',
+    skip: false, comps: false, offer: false,
+    overdue: false,
+    arv: 88000,
+    repairs: 31000,
+    info: {
+      property: [
+        ['Type','Rowhouse / SFR'],['Sqft','960'],['Beds/Baths','2 BD / 1 BA'],
+        ['Year Built','1945'],['Lot Size','1,100 sqft'],['County','Delaware'],
+        ['APN','11-00-07654-00'],['Zoning','R-3 Residential'],
+      ],
+      source: [
+        ['Category','Vacant + Tax'],['Tax Delinq.','$3,240 (1.5 yrs)'],
+        ['Utility Status','Disconnected'],['Identified','10 MAR 2026'],['Source','Drive-by + Tax Roll'],
+      ],
+      flags: [['Vacant','Confirmed'],['Code Viol.','Possible (unreported)'],['Liens','Tax only'],['Lead Priority','LOW-MED']]
+    },
+    skip_data: {
+      owner: [['Name','LOUISE F. REED'],['Mailing Addr','Unknown'],['Ownership','Since 2003 (23 yrs)']],
+      contact: [['Cell','—'],['Alt Phone','—'],['Email','—'],['Last Contact','Never']],
+    },
+    comps: [{addr:'528 Oak Ln',sqft:940,sold:'$82,000',psf:'$87.23',date:'20 JAN 26'}],
+    activity: [{ts:'10 MAR 26 08:00','txt':'Lead imported — Vacant + Tax flag (drive-by confirmed)'}],
+    crmStage: 'NEW',
+  },
+];
+
+/* Stage order for kanban */
+const STAGES = ['New','Contacted','Appt','Offer Made'];
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════════════════ */
+let selectedLeadId = 1;
+let currentDetailTab = 'info';
+let sortCol = 'score';
+let sortDir = 'desc';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  renderKanban();
+  renderTable();
+  loadLeadDetail(1);
+  calcOffer();
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════════════════════ */
+function setNavTab(el, name) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function switchSubTab(view) {
+  const isKanban = view === 'kanban';
+  document.getElementById('tabKanban').classList.toggle('active', isKanban);
+  document.getElementById('tabTable').classList.toggle('active', !isKanban);
+  document.getElementById('kanbanView').classList.toggle('active', isKanban);
+  document.getElementById('tableView').classList.toggle('active', !isKanban);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KANBAN
+═══════════════════════════════════════════════════════════════════════════ */
+function renderKanban() {
+  const container = document.getElementById('kanbanColumns');
+  container.innerHTML = '';
+
+  STAGES.forEach(stage => {
+    const leads = LEADS.filter(l => l.stage === stage);
+    const col = document.createElement('div');
+    col.className = 'kanban-col';
+
+    col.innerHTML = `
+      <div class="kanban-col-header">
+        <span class="col-stage">${stage.toUpperCase()}</span>
+        <span class="col-count">${String(leads.length).padStart(2,'0')}</span>
+      </div>
+      <div class="kanban-col-body" id="kbody-${stage.replace(' ','-')}"></div>
+    `;
+    container.appendChild(col);
+
+    const body = col.querySelector('.kanban-col-body');
+    leads.forEach(lead => {
+      body.appendChild(makeKanbanRow(lead));
+    });
+  });
+}
+
+function makeKanbanRow(lead) {
+  const div = document.createElement('div');
+  div.className = 'kanban-row' + (lead.id === selectedLeadId ? ' selected' : '');
+  div.setAttribute('data-id', lead.id);
+  div.onclick = () => selectLead(lead.id);
+
+  const tierClass = lead.tier.toLowerCase();
+  const scoreW = Math.round(lead.score / 100 * 32);
+
+  const indST = lead.skip
+    ? '<span class="ind-check">ST✓</span>'
+    : '<span class="ind-dash">ST—</span>';
+  const indCP = lead.comps
+    ? '<span class="ind-check">CP✓</span>'
+    : '<span class="ind-dash">CP—</span>';
+  const indOF = lead.offer
+    ? '<span class="ind-check">OF✓</span>'
+    : '<span class="ind-dash">OF—</span>';
+
+  const overdueHtml = lead.overdue ? '<span class="overdue-tag">[!]</span>' : '';
+
+  div.innerHTML = `
+    <div class="kanban-row-top">
+      <span class="score-badge">${lead.score}</span>
+      <div class="score-bar"><div class="score-bar-fill" style="width:${scoreW}px;"></div></div>
+      <span class="kanban-addr">${lead.addrShort}</span>
+    </div>
+    <div class="kanban-row-bottom">
+      ${lead.catTags.map(t => `<span class="cat-tag">${t}</span>`).join('')}
+      <span class="temp-tag ${tierClass}">${lead.tier}</span>
+      <span class="indicators">${indST} ${indCP} ${indOF}</span>
+      ${overdueHtml}
+    </div>
+  `;
+  return div;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════════════════════════════════════ */
+function renderTable() {
+  const sorted = getSortedLeads();
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  sorted.forEach(lead => {
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-id', lead.id);
+    if (lead.id === selectedLeadId) tr.classList.add('selected');
+    tr.onclick = () => selectLead(lead.id);
+
+    const tierClass = lead.tier.toLowerCase();
+    const scoreW = Math.round(lead.score / 100 * 48);
+
+    const indST = lead.skip ? '<span style="color:var(--green)">ST✓</span>' : '<span style="color:rgba(27,42,74,0.2)">ST—</span>';
+    const indCP = lead.comps ? '<span style="color:var(--green)">CP✓</span>' : '<span style="color:rgba(27,42,74,0.2)">CP—</span>';
+    const indOF = lead.offer ? '<span style="color:var(--green)">OF✓</span>' : '<span style="color:rgba(27,42,74,0.2)">OF—</span>';
+    const overdueCell = lead.overdue ? ' <span style="color:var(--red);font-weight:500">[!]</span>' : '';
+
+    tr.innerHTML = `
+      <td>
+        <div class="score-cell">
+          <span class="score-num">${lead.score}</span>
+          <div class="score-bar" style="width:48px;"><div class="score-bar-fill" style="width:${scoreW}px;"></div></div>
+          <span class="tier-label ${tierClass}">${lead.tier}</span>
+        </div>
+      </td>
+      <td style="font-family:var(--font-body);font-size:12px;">${lead.address}${overdueCell}</td>
+      <td>${lead.catTags.map(t => `<span class="cat-tag">${t}</span>`).join(' ')}</td>
+      <td style="font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">${lead.stage}</td>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--muted);">${formatFollowup(lead.followup)}</td>
+      <td style="font-family:var(--font-mono);font-size:11px;">${indST} ${indCP} ${indOF}</td>
+      <td><button class="view-btn" onclick="event.stopPropagation();selectLead(${lead.id})">VIEW</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function formatFollowup(dateStr) {
+  if (!dateStr) return '—';
+  const [y,m,d] = dateStr.split('-');
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  return `${d} ${months[parseInt(m)-1]} ${y.slice(2)}`;
+}
+
+function getSortedLeads() {
+  const arr = [...LEADS];
+  arr.sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (sortCol === 'address') { av = a.address; bv = b.address; }
+    if (sortCol === 'category') { av = a.catTags.join(','); bv = b.catTags.join(','); }
+    if (sortCol === 'stage') { av = a.stage; bv = b.stage; }
+    if (sortCol === 'followup') { av = a.followup || ''; bv = b.followup || ''; }
+    if (sortCol === 'data') { av = (a.skip?1:0)+(a.comps?1:0)+(a.offer?1:0); bv = (b.skip?1:0)+(b.comps?1:0)+(b.offer?1:0); }
+    if (typeof av === 'number') return sortDir === 'asc' ? av - bv : bv - av;
+    return sortDir === 'asc' ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+  });
+  return arr;
+}
+
+function sortTable(col) {
+  if (sortCol === col) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortCol = col;
+    sortDir = col === 'score' || col === 'data' ? 'desc' : 'asc';
+  }
+  // Update arrow indicators
+  ['score','address','category','stage','followup','data'].forEach(c => {
+    const el = document.getElementById('sort-' + c);
+    if (!el) return;
+    el.className = 'sort-arrow';
+    if (c === sortCol) {
+      el.classList.add(sortDir, 'active');
+    }
+  });
+  renderTable();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SELECT LEAD
+═══════════════════════════════════════════════════════════════════════════ */
+function selectLead(id) {
+  selectedLeadId = id;
+  // Update kanban selection
+  document.querySelectorAll('.kanban-row').forEach(el => {
+    el.classList.toggle('selected', parseInt(el.getAttribute('data-id')) === id);
+  });
+  // Update table selection
+  document.querySelectorAll('#tableBody tr').forEach(el => {
+    el.classList.toggle('selected', parseInt(el.getAttribute('data-id')) === id);
+  });
+  loadLeadDetail(id);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOAD LEAD DETAIL
+═══════════════════════════════════════════════════════════════════════════ */
+function loadLeadDetail(id) {
+  const lead = LEADS.find(l => l.id === id);
+  if (!lead) return;
+
+  // Header
+  const scoreEl = document.getElementById('detailScore');
+  scoreEl.textContent = lead.score;
+  scoreEl.className = 'detail-score';
+  if (lead.tier === 'HOT') scoreEl.classList.add('hot-score');
+
+  const tierBadge = document.getElementById('detailTierBadge');
+  tierBadge.textContent = lead.tier;
+  tierBadge.className = 'score-tier-badge ' + lead.tier.toLowerCase();
+
+  document.getElementById('detailAddress').textContent = lead.address.toUpperCase();
+
+  const tagsEl = document.getElementById('detailTags');
+  tagsEl.innerHTML = lead.catTags.map(t => `<span class="detail-tag">${t}</span>`).join('');
+  if (lead.overdue) tagsEl.innerHTML += '<span class="detail-tag" style="color:var(--red);border-color:var(--red);">OVERDUE</span>';
+
+  // INFO tab
+  buildKVTable('kvPropertyTable', lead.info.property);
+  buildKVTable('kvSourceTable', lead.info.source);
+  buildKVTable('kvFlagsTable', lead.info.flags);
+
+  // SKIP tab
+  buildSkipTable('skipOwnerTable', lead.skip_data.owner, false);
+  buildSkipTable('skipContactTable', lead.skip_data.contact, true);
+
+  // COMPS tab
+  document.getElementById('arvValue').textContent = '$' + lead.arv.toLocaleString();
+  const compBody = document.getElementById('compTableBody');
+  compBody.innerHTML = '';
+  lead.comps.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${c.addr}</td><td>${c.sqft.toLocaleString()}</td><td>${c.sold}</td><td>${c.psf}</td><td>${c.date}</td>`;
+    compBody.appendChild(tr);
+  });
+
+  // CRM tab
+  const stageButtons = document.querySelectorAll('.stage-btn');
+  stageButtons.forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === lead.crmStage);
+  });
+  document.getElementById('followupDate').value = lead.followup || '';
+  const logEl = document.getElementById('activityLog');
+  logEl.innerHTML = '';
+  lead.activity.forEach(a => {
+    const item = document.createElement('div');
+    item.className = 'activity-item';
+    item.innerHTML = `<span class="activity-ts">${a.ts}</span><span class="activity-txt">${a.txt}</span>`;
+    logEl.appendChild(item);
+  });
+
+  // OFFER tab
+  document.getElementById('offerArv').value = lead.arv;
+  document.getElementById('offerRepairs').value = lead.repairs;
+  calcOffer();
+}
+
+function buildKVTable(tableId, rows) {
+  const table = document.getElementById(tableId);
+  table.innerHTML = '';
+  rows.forEach(([key, val]) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="kv-key">${key}</td><td class="kv-val mono">${val}</td>`;
+    table.appendChild(tr);
+  });
+}
+
+function buildSkipTable(tableId, rows, showBtn) {
+  const table = document.getElementById(tableId);
+  table.innerHTML = '';
+  rows.forEach(([key, val]) => {
+    const tr = document.createElement('tr');
+    const btnHtml = showBtn && val !== '—' ? `<td><button class="lookup-btn">LOOKUP</button></td>` : (showBtn ? '<td></td>' : '');
+    tr.innerHTML = `<td style="color:var(--muted);width:100px;">${key}</td><td style="flex:1;">${val}</td>${btnHtml}`;
+    table.appendChild(tr);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DETAIL TABS
+═══════════════════════════════════════════════════════════════════════════ */
+function switchDetailTab(tab) {
+  currentDetailTab = tab;
+  document.querySelectorAll('.detail-tab').forEach((el, i) => {
+    const tabs = ['info','skip','comps','crm','offer'];
+    el.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.detail-pane').forEach(el => {
+    el.classList.toggle('active', el.id === 'pane-' + tab);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CRM STAGE
+═══════════════════════════════════════════════════════════════════════════ */
+function setStage(btn, stageName) {
+  document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const lead = LEADS.find(l => l.id === selectedLeadId);
+  if (lead) lead.crmStage = stageName;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OFFER CALCULATOR
+═══════════════════════════════════════════════════════════════════════════ */
+function calcOffer() {
+  const arv = parseFloat(document.getElementById('offerArv').value) || 0;
+  const repairs = parseFloat(document.getElementById('offerRepairs').value) || 0;
+  const margin = parseFloat(document.getElementById('offerMargin').value) || 70;
+  const profit = parseFloat(document.getElementById('offerProfit').value) || 10000;
+
+  // MAO = (ARV × margin%) − repairs − profit
+  const mao = (arv * margin / 100) - repairs - profit;
+  const resultEl = document.getElementById('offerResult');
+  const notesEl = document.getElementById('offerNotes');
+
+  if (mao <= 0 || isNaN(mao)) {
+    resultEl.textContent = 'N/A';
+    resultEl.style.color = 'var(--red)';
+    notesEl.textContent = 'Deal does not pencil at these numbers.';
+  } else {
+    resultEl.textContent = '$' + Math.round(mao).toLocaleString();
+    resultEl.style.color = 'var(--gold)';
+    const pct = ((mao / arv) * 100).toFixed(1);
+    notesEl.textContent = `MAO = (ARV × ${margin}%) − $${repairs.toLocaleString()} repairs − $${profit.toLocaleString()} profit  //  ${pct}% of ARV`;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand */
+  --navy: #1B2A4A;
+  --navy-deep: #0F1B30;
+  --navy-mid: #253958;
+  --gold: #B8985A;
+  --gold-light: #D4B87A;
+  --cream: #FDFBF7;
+  --sand: #F4EFE7;
+  --sand-mid: #EAE3D8;
+  --border: #DDD6CB;
+  --border-light: #EDE7DF;
+
+  /* Semantic */
+  --te-red: #8B1A1A;
+  --red-bright: #C0392B;
+  --te-green: #2D7A4F;
+  --green-bright: #1A8C52;
+  --blue: #2563EB;
+  --orange: #C07028;
+
+  /* Text */
+  --text: #1B2A4A;
+  --text-mid: #4A5E7A;
+  --text-muted: #8A98AE;
+
+  /* Tailwind compat */
+  --color-navy: #1B2A4A;
+  --color-gold: #B8985A;
+  --color-cream: #FDFBF7;
+  --color-sand: #F4EFE7;
+  --color-te-red: #8B1A1A;
+  --color-te-green: #2D7A4F;
+  --background: #FDFBF7;
+  --foreground: #1B2A4A;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-body);
+}
+
+body {
+  background: var(--cream);
+  color: var(--text);
+  font-family: var(--font-body), 'Outfit', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 13px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+}
+
+/* ── Time Decay Card States ── */
+.decay-aging {
+  background: #FFFDF5 !important;
+}
+.decay-stale {
+  background: #FFFBEB !important;
+  border-color: #F6E3A8 !important;
+}
+.decay-cold {
+  background: #FFF7E6 !important;
+  border-color: #F0C060 !important;
+}
+.decay-dead {
+  background: #FFF5F5 !important;
+  border-color: #FDCDC9 !important;
+}
+
+/* Decay progress bar at card bottom */
+.decay-bar {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  border-radius: 0 0 6px 6px;
+  pointer-events: none;
+}
+.decay-aging .decay-bar {
+  background: linear-gradient(90deg, #FCD34D, transparent);
+  width: 25%;
+}
+.decay-stale .decay-bar {
+  background: linear-gradient(90deg, #F59E0B, #FCD34D);
+  width: 50%;
+}
+.decay-cold .decay-bar {
+  background: linear-gradient(90deg, #F97316, #F59E0B);
+  width: 75%;
+}
+.decay-dead .decay-bar {
+  background: linear-gradient(90deg, var(--red-bright), #F97316);
+  width: 100%;
+}
+
+/* ── Score Tooltip ── */
+.score-tooltip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  right: -4px;
+  background: var(--navy-deep);
+  border-radius: 6px;
+  padding: 10px 12px;
+  min-width: 200px;
+  z-index: 200;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+  white-space: nowrap;
+}
+.score-wrap:hover .score-tooltip {
+  display: block;
+}
+.score-tooltip::after {
+  content: '';
+  position: absolute;
+  top: -4px; right: 14px;
+  width: 7px; height: 7px;
+  background: var(--navy-deep);
+  transform: rotate(45deg);
+}
+
+/* ── Quick Actions ── */
+.card-quick-actions {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  background: rgba(12,22,42,0.93);
+  border-radius: 0 0 6px 6px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+}
+.lead-card-wrap:hover .card-quick-actions {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sand-mid); border-radius: 3px; }
+
+/* Safe area for mobile bottom nav */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Hide scrollbar for pipeline horizontal scroll */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth transitions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

@@ -1,0 +1,2020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estate Ledger — TE Lead Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: #FDFBF7;
+    color: #1B2A4A;
+    display: flex;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #D4C9B8; border-radius: 3px; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: #FDFBF7;
+    border-right: 1px solid #E8E0D4;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    padding: 32px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .logo-mark-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-monogram {
+    width: 40px;
+    height: 40px;
+    background: #B8985A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-monogram span {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: #FFFFFF;
+    letter-spacing: 0.5px;
+  }
+
+  .logo-text-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .logo-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #1B2A4A;
+    letter-spacing: 0.8px;
+    line-height: 1.2;
+  }
+
+  .logo-sub {
+    font-family: 'Outfit', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: #B8985A;
+    text-transform: uppercase;
+  }
+
+  .sidebar-rule {
+    height: 1px;
+    background: #B8985A;
+    margin: 0 24px 20px;
+    opacity: 0.5;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 12px;
+    flex: 1;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #8A8074;
+    position: relative;
+    transition: color 0.2s, background 0.2s;
+    border: none;
+    background: transparent;
+    text-align: left;
+    width: 100%;
+    letter-spacing: 0.01em;
+  }
+
+  .nav-item:hover { color: #1B2A4A; background: #F4EFE7; }
+
+  .nav-item.active {
+    color: #1B2A4A;
+    font-weight: 500;
+    background: #F4EFE7;
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    background: #B8985A;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .nav-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .sidebar-bottom {
+    padding: 16px 24px 24px;
+    border-top: 1px solid #E8E0D4;
+    margin-top: 16px;
+  }
+
+  .nav-item-settings {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #8A8074;
+    cursor: pointer;
+    padding: 6px 2px;
+    transition: color 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-item-settings:hover { color: #1B2A4A; }
+
+  /* ── Main Content ── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #FDFBF7;
+  }
+
+  .main-inner {
+    padding: 40px 48px 60px;
+    max-width: 1200px;
+  }
+
+  /* ── Page Header ── */
+  .page-header {
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px;
+    font-weight: 600;
+    color: #1B2A4A;
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+  }
+
+  .page-date {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #8A8074;
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  .page-rule {
+    height: 1px;
+    background: #B8985A;
+    margin: 18px 0 0;
+    opacity: 0.4;
+  }
+
+  /* ── Overdue Alert ── */
+  .overdue-alert {
+    background: #F4EFE7;
+    border: 1px solid #E8E0D4;
+    border-radius: 2px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 28px;
+  }
+
+  .overdue-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #8B1A1A;
+    flex-shrink: 0;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+
+  .overdue-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12.5px;
+    color: #8B1A1A;
+    letter-spacing: 0.01em;
+  }
+
+  .overdue-text strong { font-weight: 600; }
+
+  /* ── Stats Row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: #FFFFFF;
+    border: 1px solid #1B2A4A;
+    border-radius: 2px;
+    padding: 24px 22px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.25s;
+    box-shadow: 0 2px 12px rgba(27,42,74,0.08);
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 24px;
+    height: 3px;
+    background: #B8985A;
+  }
+
+  .stat-card:hover {
+    box-shadow: 0 6px 24px rgba(27,42,74,0.14);
+  }
+
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 56px;
+    font-weight: 600;
+    color: #1B2A4A;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .stat-number.hot { color: #DC2626; }
+  .stat-number.gold { color: #B8985A; }
+
+  .stat-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: #8A8074;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  .stat-sub {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    color: #B8985A;
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  /* ── Section Heading ── */
+  .section-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: #1B2A4A;
+    letter-spacing: -0.3px;
+    margin-bottom: 10px;
+    line-height: 1.1;
+  }
+
+  .section-rule {
+    height: 1px;
+    background: #B8985A;
+    opacity: 0.35;
+    margin-bottom: 20px;
+  }
+
+  /* ── Pipeline Progress Bar ── */
+  .pipeline-stages {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 24px;
+    padding: 18px 22px;
+    background: #FFFFFF;
+    border: 1px solid #E8E0D4;
+    border-radius: 2px;
+    box-shadow: 0 2px 12px rgba(27,42,74,0.05);
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .stage-track {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 0;
+  }
+
+  .stage-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .stage-item:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 11px;
+    right: 50%;
+    left: -50%;
+    height: 1px;
+    background: #D4C9B8;
+    z-index: 0;
+  }
+
+  .stage-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #D4C9B8;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .stage-dot.filled {
+    background: #1B2A4A;
+    border-color: #1B2A4A;
+  }
+
+  .stage-dot.active-stage {
+    background: #B8985A;
+    border-color: #B8985A;
+    box-shadow: 0 0 0 4px rgba(184,152,90,0.18);
+  }
+
+  .stage-dot-inner {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    opacity: 0;
+  }
+
+  .stage-dot.filled .stage-dot-inner,
+  .stage-dot.active-stage .stage-dot-inner { opacity: 1; }
+
+  .stage-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: #8A8074;
+    text-transform: uppercase;
+    margin-top: 7px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .stage-count {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1B2A4A;
+    margin-top: 1px;
+  }
+
+  /* ── Filter Pills ── */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: #8A8074;
+    text-transform: uppercase;
+    margin-right: 4px;
+    align-self: center;
+  }
+
+  .filter-pill {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #8A8074;
+    border: 1px solid #D4C9B8;
+    border-radius: 1px;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: transparent;
+    letter-spacing: 0.04em;
+  }
+
+  .filter-pill:hover {
+    border-color: #1B2A4A;
+    color: #1B2A4A;
+  }
+
+  .filter-pill.active {
+    background: #1B2A4A;
+    color: #FFFFFF;
+    border-color: #1B2A4A;
+  }
+
+  /* ── Lead Cards Grid ── */
+  .leads-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  .lead-card {
+    background: #FFFFFF;
+    border-radius: 2px;
+    border: 1px solid #E8E0D4;
+    box-shadow: 0 2px 12px rgba(27,42,74,0.08);
+    padding: 22px 24px 18px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.22s, border-color 0.22s, transform 0.22s;
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .lead-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .lead-card:hover {
+    box-shadow: 0 8px 32px rgba(27,42,74,0.16);
+    border-color: #B8985A;
+    transform: translateY(-2px);
+  }
+
+  .lead-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: #B8985A;
+    transition: width 0.2s;
+  }
+
+  .lead-card:hover::before { width: 3px; }
+
+  .lead-card.hot-card,
+  .lead-card.warm-card {
+    border-bottom: 2px solid #B8985A;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .card-tier-block {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-tier-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .tier-hot  { color: #DC2626; }
+  .tier-warm { color: #D97706; }
+  .tier-cool { color: #2563EB; }
+  .tier-cold { color: #6B7280; }
+
+  .card-score {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .score-hot  { color: #DC2626; }
+  .score-warm { color: #D97706; }
+  .score-cool { color: #2563EB; }
+  .score-cold { color: #6B7280; }
+
+  .stage-badge {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 1px;
+  }
+
+  .badge-new        { background: #EEF2FF; color: #3730A3; }
+  .badge-contacted  { background: #F0FDF4; color: #166534; }
+  .badge-appt       { background: #FFF7ED; color: #9A3412; }
+  .badge-offer      { background: #FEF2F2; color: #7F1D1D; }
+  .badge-negotiating { background: #FDF4FF; color: #6B21A8; }
+  .badge-closed     { background: #F0FDF4; color: #166534; }
+
+  .card-address {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1B2A4A;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    letter-spacing: -0.2px;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .card-tag {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: #1B2A4A;
+    border: 1px solid #1B2A4A;
+    border-radius: 1px;
+    padding: 2px 9px;
+    opacity: 0.7;
+  }
+
+  .card-tag-note {
+    font-family: 'EB Garamond', serif;
+    font-size: 12px;
+    font-style: italic;
+    color: #8A8074;
+    margin-left: 2px;
+    align-self: center;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .card-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 11.5px;
+    color: #8A8074;
+  }
+
+  .card-meta-item svg { opacity: 0.5; }
+
+  .card-indicators {
+    display: flex;
+    gap: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #F0EBE3;
+  }
+
+  .card-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    color: #8A8074;
+  }
+
+  .indicator-check {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+  }
+
+  .check-done {
+    background: rgba(184,152,90,0.12);
+    color: #B8985A;
+  }
+
+  .check-pending {
+    background: #F0EBE3;
+    color: #C4B89A;
+  }
+
+  /* ── No leads message ── */
+  .no-leads {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    font-family: 'EB Garamond', serif;
+    font-size: 20px;
+    color: #8A8074;
+    font-style: italic;
+  }
+
+  /* ── Modal Overlay ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(27,42,74,0.45);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    padding: 24px;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: #FDFBF7;
+    width: 700px;
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgba(27,42,74,0.28);
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden;
+  }
+
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .modal-header {
+    padding: 28px 32px 0;
+    background: #FFFFFF;
+    flex-shrink: 0;
+  }
+
+  .modal-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .modal-address {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: #1B2A4A;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #8A8074;
+    font-size: 20px;
+    border: none;
+    background: transparent;
+    border-radius: 2px;
+    transition: color 0.15s, background 0.15s;
+    flex-shrink: 0;
+    margin-left: 16px;
+    margin-top: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+  }
+
+  .modal-close:hover { color: #1B2A4A; background: #F4EFE7; }
+
+  .modal-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    align-items: center;
+  }
+
+  .modal-tier {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .modal-score-badge {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 1px 10px;
+    border-radius: 1px;
+  }
+
+  .modal-rule {
+    height: 1px;
+    background: #B8985A;
+    opacity: 0.35;
+    margin: 0 -32px;
+  }
+
+  /* ── Modal Tabs ── */
+  .modal-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 32px;
+    background: #FFFFFF;
+    flex-shrink: 0;
+    border-bottom: 1px solid #E8E0D4;
+  }
+
+  .modal-tab {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8A8074;
+    padding: 14px 16px 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.18s, border-color 0.18s;
+    border: none;
+    background: transparent;
+    margin-bottom: -1px;
+  }
+
+  .modal-tab:hover { color: #1B2A4A; }
+
+  .modal-tab.active {
+    color: #1B2A4A;
+    border-bottom: 2px solid #B8985A;
+    font-weight: 600;
+  }
+
+  /* ── Modal Body ── */
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px 32px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Info Tab ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .info-group {
+    padding: 16px 0;
+    border-bottom: 1px solid #F0EBE3;
+  }
+
+  .info-group:last-child { border-bottom: none; }
+
+  .info-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: #B8985A;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .info-value {
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    color: #1B2A4A;
+  }
+
+  /* ── Skip Trace Tab ── */
+  .skip-owner-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: #1B2A4A;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+
+  .skip-section-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: #8A8074;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .skip-contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .skip-contact-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #FFFFFF;
+    border: 1px solid #E8E0D4;
+    border-radius: 2px;
+  }
+
+  .skip-contact-type {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #B8985A;
+    min-width: 50px;
+  }
+
+  .skip-contact-value {
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    color: #1B2A4A;
+    flex: 1;
+  }
+
+  .skip-contact-tag {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    color: #2D7A4F;
+    background: #F0FDF4;
+    border: 1px solid #86EFAC;
+    border-radius: 1px;
+    padding: 2px 7px;
+  }
+
+  /* ── Comps Tab ── */
+  .arv-display {
+    text-align: center;
+    padding: 24px 0 20px;
+    border-bottom: 1px solid #E8E0D4;
+    margin-bottom: 22px;
+  }
+
+  .arv-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    color: #8A8074;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .arv-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 56px;
+    font-weight: 700;
+    color: #B8985A;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+
+  .arv-sub {
+    font-family: 'EB Garamond', serif;
+    font-size: 14px;
+    color: #8A8074;
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .comps-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'EB Garamond', serif;
+    font-size: 15px;
+  }
+
+  .comps-table th {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8A8074;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #B8985A;
+  }
+
+  .comps-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #F0EBE3;
+    color: #1B2A4A;
+    vertical-align: top;
+  }
+
+  .comps-table tr:last-child td { border-bottom: none; }
+  .comps-table tr:hover td { background: #FDFBF7; }
+
+  /* ── CRM Tab ── */
+  .crm-stage-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #E8E0D4;
+  }
+
+  .crm-stage-btn {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8A8074;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    padding: 6px 4px;
+    cursor: pointer;
+    transition: color 0.18s, border-color 0.18s;
+  }
+
+  .crm-stage-btn:hover { color: #1B2A4A; border-bottom-color: #D4C9B8; }
+
+  .crm-stage-btn.active {
+    color: #1B2A4A;
+    border-bottom-color: #B8985A;
+    font-weight: 600;
+  }
+
+  .crm-stage-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: #B8985A;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .activity-item {
+    display: flex;
+    gap: 14px;
+    padding-bottom: 20px;
+    position: relative;
+  }
+
+  .activity-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 30px;
+    bottom: 0;
+    width: 1px;
+    background: #E8E0D4;
+  }
+
+  .activity-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #F4EFE7;
+    border: 2px solid #E8E0D4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: #8A8074;
+    position: relative;
+    z-index: 1;
+  }
+
+  .activity-dot.gold { border-color: #B8985A; background: rgba(184,152,90,0.08); color: #B8985A; }
+
+  .activity-content { flex: 1; padding-top: 5px; }
+
+  .activity-action {
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1B2A4A;
+    margin-bottom: 2px;
+  }
+
+  .activity-note {
+    font-family: 'EB Garamond', serif;
+    font-size: 14px;
+    color: #8A8074;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .activity-date {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10.5px;
+    color: #C4B89A;
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Offer Tab ── */
+  .offer-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .offer-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .offer-field label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8A8074;
+  }
+
+  .offer-field input {
+    font-family: 'EB Garamond', serif;
+    font-size: 17px;
+    color: #1B2A4A;
+    border: none;
+    border-bottom: 1.5px solid #D4C9B8;
+    background: transparent;
+    padding: 6px 2px;
+    outline: none;
+    transition: border-color 0.18s;
+    width: 100%;
+  }
+
+  .offer-field input:focus { border-bottom-color: #B8985A; }
+
+  .offer-result {
+    text-align: center;
+    padding: 28px 20px;
+    background: #FFFFFF;
+    border: 1px solid #E8E0D4;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .offer-result::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #B8985A 0%, #D4B87A 50%, #B8985A 100%);
+  }
+
+  .offer-result-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: #8A8074;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .offer-max {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 700;
+    color: #2D7A4F;
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+
+  .offer-breakdown {
+    font-family: 'EB Garamond', serif;
+    font-size: 13px;
+    color: #8A8074;
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  /* ── Transitions ── */
+  .lead-card {
+    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  }
+
+  /* ── Responsive fix ── */
+  @media (max-width: 900px) {
+    .leads-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark-row">
+      <div class="logo-monogram"><span>TE</span></div>
+      <div class="logo-text-col">
+        <span class="logo-name">TE HOME BUYERS</span>
+        <span class="logo-sub">Lead Engine</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-rule"></div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="setNav(this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        <rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        <rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="setNav(this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Leads
+    </button>
+    <button class="nav-item" onclick="setNav(this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Scrub Engine
+    </button>
+    <button class="nav-item" onclick="setNav(this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 13L6 4l4 6 2-3 2 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Cash Buyers
+    </button>
+    <button class="nav-item" onclick="setNav(this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M8 5v6M5 8h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Add Lead
+    </button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="nav-item-settings">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="2.5" stroke="#8A8074" stroke-width="1.4"/>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="#8A8074" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Settings
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<main class="main" id="mainArea">
+  <div class="main-inner">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">Pipeline Overview</h1>
+      <p class="page-date">April 2, 2026</p>
+    </div>
+    <div class="page-rule"></div>
+
+    <!-- Overdue Alert -->
+    <div class="overdue-alert">
+      <div class="overdue-dot"></div>
+      <div class="overdue-text">
+        <strong>1 follow-up overdue</strong> &nbsp;·&nbsp; 120 Lansdowne Ave
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-number">8</div>
+        <div class="stat-label">Active Leads</div>
+        <div class="stat-sub">+2 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number hot">2</div>
+        <div class="stat-label">Hot Leads</div>
+        <div class="stat-sub">Score 80+</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number gold">$166K</div>
+        <div class="stat-label">Avg ARV</div>
+        <div class="stat-sub">Est. portfolio</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">46</div>
+        <div class="stat-label">Avg Score</div>
+        <div class="stat-sub">Across pipeline</div>
+      </div>
+    </div>
+
+    <!-- Pipeline Section -->
+    <div class="section-heading">Active Pipeline</div>
+    <div class="section-rule"></div>
+
+    <!-- Stage Progress Bar -->
+    <div class="pipeline-stages">
+      <div class="stage-track">
+        <div class="stage-item">
+          <div class="stage-dot filled"><div class="stage-dot-inner"></div></div>
+          <div class="stage-label">New</div>
+          <div class="stage-count">3</div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot filled"><div class="stage-dot-inner"></div></div>
+          <div class="stage-label">Contacted</div>
+          <div class="stage-count">2</div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot active-stage"><div class="stage-dot-inner"></div></div>
+          <div class="stage-label">Appt Set</div>
+          <div class="stage-count">1</div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot"><div class="stage-dot-inner"></div></div>
+          <div class="stage-label">Offer Out</div>
+          <div class="stage-count">1</div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot"><div class="stage-dot-inner"></div></div>
+          <div class="stage-label">Negotiating</div>
+          <div class="stage-count">1</div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot"><div class="stage-dot-inner"></div></div>
+          <div class="stage-label">Closed</div>
+          <div class="stage-count">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Pills -->
+    <div class="filter-row">
+      <span class="filter-label">Filter</span>
+      <button class="filter-pill active" data-filter="all">All</button>
+      <button class="filter-pill" data-filter="hot">Hot</button>
+      <button class="filter-pill" data-filter="warm">Warm</button>
+      <button class="filter-pill" data-filter="new">New</button>
+      <button class="filter-pill" data-filter="contacted">Contacted</button>
+      <button class="filter-pill" data-filter="appt">Appt Set</button>
+      <button class="filter-pill" data-filter="offer">Offer Out</button>
+    </div>
+
+    <!-- Lead Cards Grid -->
+    <div class="leads-grid" id="leadsGrid"></div>
+
+  </div>
+</main>
+
+<!-- ═══════════════════ MODAL ═══════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+
+    <div class="modal-header">
+      <div class="modal-header-top">
+        <div>
+          <div class="modal-address" id="modalAddress">412 W 3rd St</div>
+          <div class="modal-badges" id="modalBadges"></div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-rule"></div>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-tab="info">Info</button>
+      <button class="modal-tab" data-tab="skiptrace">Skip Trace</button>
+      <button class="modal-tab" data-tab="comps">Comps</button>
+      <button class="modal-tab" data-tab="crm">CRM</button>
+      <button class="modal-tab" data-tab="offer">Offer</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- INFO -->
+      <div class="tab-panel active" id="panel-info">
+        <div class="info-grid">
+          <div class="info-group">
+            <div class="info-label">Full Address</div>
+            <div class="info-value">412 W 3rd St, Wilmington, DE 19801</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Lead Source</div>
+            <div class="info-value">Driving for Dollars</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Property Type</div>
+            <div class="info-value">Single Family Residential</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Year Built</div>
+            <div class="info-value">1948</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Sq Footage</div>
+            <div class="info-value">1,240 sq ft · 3 Bed / 1 Bath</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Lot Size</div>
+            <div class="info-value">4,500 sq ft</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Assessed Value</div>
+            <div class="info-value">$112,400</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Data Freshness</div>
+            <div class="info-value">Updated March 28, 2026</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Vacancy Status</div>
+            <div class="info-value">Likely Vacant — Confirmed</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Date Added</div>
+            <div class="info-value">February 14, 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SKIP TRACE -->
+      <div class="tab-panel" id="panel-skiptrace">
+        <span class="skip-section-label">Confirmed Owner</span>
+        <div class="skip-owner-name">Robert J. Calloway</div>
+        <div style="font-family:'EB Garamond',serif;font-size:14px;color:#8A8074;font-style:italic;margin-bottom:22px;">Last known mailing: 78 Greenhill Rd, Newark, DE 19702</div>
+
+        <span class="skip-section-label">Contact Details</span>
+        <div class="skip-contacts">
+          <div class="skip-contact-row">
+            <span class="skip-contact-type">Mobile</span>
+            <span class="skip-contact-value">(302) 555-0147</span>
+            <span class="skip-contact-tag">Primary</span>
+          </div>
+          <div class="skip-contact-row">
+            <span class="skip-contact-type">Mobile</span>
+            <span class="skip-contact-value">(302) 555-0289</span>
+            <span class="skip-contact-tag">Secondary</span>
+          </div>
+          <div class="skip-contact-row">
+            <span class="skip-contact-type">Email</span>
+            <span class="skip-contact-value">r.calloway1952@gmail.com</span>
+            <span class="skip-contact-tag">Verified</span>
+          </div>
+          <div class="skip-contact-row">
+            <span class="skip-contact-type">Landline</span>
+            <span class="skip-contact-value">(302) 555-0331</span>
+            <span style="font-family:'Outfit',sans-serif;font-size:10px;color:#8A8074;background:#F4EFE7;border:1px solid #D4C9B8;border-radius:1px;padding:2px 7px;">Disconnected</span>
+          </div>
+        </div>
+
+        <span class="skip-section-label">Ownership Details</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="info-group">
+            <div class="info-label">Owner Since</div>
+            <div class="info-value">1987 — 39 years</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Ownership Type</div>
+            <div class="info-value">Individual</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Liens / Mortgages</div>
+            <div class="info-value">None on record</div>
+          </div>
+          <div class="info-group">
+            <div class="info-label">Tax Status</div>
+            <div class="info-value" style="color:#D97706;">2 years delinquent</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPS -->
+      <div class="tab-panel" id="panel-comps">
+        <div class="arv-display">
+          <div class="arv-label">After Repair Value (ARV)</div>
+          <div class="arv-number">$172,000</div>
+          <div class="arv-sub">Based on 4 active comparables · 0.4 mi radius</div>
+        </div>
+
+        <table class="comps-table">
+          <thead>
+            <tr>
+              <th>Address</th>
+              <th>Beds/Bath</th>
+              <th>Sq Ft</th>
+              <th>Sale Price</th>
+              <th>$/sqft</th>
+              <th>Sold</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>318 W 3rd St</td>
+              <td>3 / 1</td>
+              <td>1,180</td>
+              <td>$168,000</td>
+              <td>$142</td>
+              <td>Jan '26</td>
+            </tr>
+            <tr>
+              <td>509 W 4th St</td>
+              <td>3 / 1.5</td>
+              <td>1,310</td>
+              <td>$179,500</td>
+              <td>$137</td>
+              <td>Feb '26</td>
+            </tr>
+            <tr>
+              <td>215 Broom St</td>
+              <td>3 / 1</td>
+              <td>1,200</td>
+              <td>$163,000</td>
+              <td>$136</td>
+              <td>Dec '25</td>
+            </tr>
+            <tr>
+              <td>441 W 3rd St</td>
+              <td>4 / 2</td>
+              <td>1,450</td>
+              <td>$195,000</td>
+              <td>$134</td>
+              <td>Mar '26</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- CRM -->
+      <div class="tab-panel" id="panel-crm">
+        <span class="skip-section-label">Current Stage</span>
+        <div class="crm-stage-row">
+          <button class="crm-stage-btn" onclick="setCrmStage(this)">New</button>
+          <button class="crm-stage-btn" onclick="setCrmStage(this)">Contacted</button>
+          <button class="crm-stage-btn active" onclick="setCrmStage(this)">Appt Set</button>
+          <button class="crm-stage-btn" onclick="setCrmStage(this)">Offer Out</button>
+          <button class="crm-stage-btn" onclick="setCrmStage(this)">Negotiating</button>
+          <button class="crm-stage-btn" onclick="setCrmStage(this)">Closed</button>
+          <button class="crm-stage-btn" onclick="setCrmStage(this)" style="color:#8B1A1A;">Dead</button>
+        </div>
+
+        <span class="crm-stage-label">Activity Timeline</span>
+        <div class="activity-timeline">
+          <div class="activity-item">
+            <div class="activity-dot gold">★</div>
+            <div class="activity-content">
+              <div class="activity-action">Appointment Scheduled</div>
+              <div class="activity-note">Walk-through confirmed for April 7th at 10am. Owner indicated "some damage inside."</div>
+              <div class="activity-date">March 31, 2026</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot">✆</div>
+            <div class="activity-content">
+              <div class="activity-action">Phone Contact Made</div>
+              <div class="activity-note">Spoke with Robert for 8 minutes. He's motivated, inherited property, lives out of state.</div>
+              <div class="activity-date">March 28, 2026</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot">✉</div>
+            <div class="activity-content">
+              <div class="activity-action">Direct Mail Delivered</div>
+              <div class="activity-note">Yellow letter sent to 78 Greenhill Rd, Newark. Returned call 3 days later.</div>
+              <div class="activity-date">March 18, 2026</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot">◎</div>
+            <div class="activity-content">
+              <div class="activity-action">Lead Added to Pipeline</div>
+              <div class="activity-note">Flagged during DFD route — exterior deterioration, overgrown yard, vacant signs.</div>
+              <div class="activity-date">February 14, 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OFFER -->
+      <div class="tab-panel" id="panel-offer">
+        <div class="offer-form">
+          <div class="offer-field">
+            <label>ARV ($)</label>
+            <input type="number" id="offerArv" value="172000" oninput="calcOffer()">
+          </div>
+          <div class="offer-field">
+            <label>Repair Estimate ($)</label>
+            <input type="number" id="offerRepair" value="28000" oninput="calcOffer()">
+          </div>
+          <div class="offer-field">
+            <label>Wholesale Fee ($)</label>
+            <input type="number" id="offerFee" value="8000" oninput="calcOffer()">
+          </div>
+          <div class="offer-field">
+            <label>Closing Costs (%)</label>
+            <input type="number" id="offerClosing" value="3" oninput="calcOffer()">
+          </div>
+          <div class="offer-field">
+            <label>Profit Margin (%)</label>
+            <input type="number" id="offerMargin" value="20" oninput="calcOffer()">
+          </div>
+          <div class="offer-field">
+            <label>Holding Costs ($)</label>
+            <input type="number" id="offerHolding" value="4500" oninput="calcOffer()">
+          </div>
+        </div>
+
+        <div class="offer-result">
+          <div class="offer-result-label">Maximum Allowable Offer</div>
+          <div class="offer-max" id="offerMax">$87,340</div>
+          <div class="offer-breakdown" id="offerBreakdown">ARV $172K &minus; Repairs $28K &minus; Profit $34.4K &minus; Costs $22.3K</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────
+// DATA
+// ─────────────────────────────────────
+const leads = [
+  {
+    id: 1,
+    address: "412 W 3rd St",
+    city: "Wilmington, DE 19801",
+    score: 88,
+    tier: "HOT",
+    stage: "appt",
+    stageLabel: "Appt Set",
+    stageBadgeClass: "badge-appt",
+    categories: ["Vacant", "Pre-Probate"],
+    stacked: false,
+    followUp: "Apr 7, 2026",
+    skipTrace: true,
+    comps: true,
+    offer: false,
+  },
+  {
+    id: 2,
+    address: "120 Lansdowne Ave",
+    city: "Wilmington, DE 19805",
+    score: 82,
+    tier: "HOT",
+    stage: "new",
+    stageLabel: "New",
+    stageBadgeClass: "badge-new",
+    categories: ["Tax Delinquent", "Absentee Owner", "Distressed"],
+    stacked: true,
+    stackCount: 3,
+    followUp: "Mar 28, 2026",
+    overdue: true,
+    skipTrace: true,
+    comps: false,
+    offer: false,
+  },
+  {
+    id: 3,
+    address: "78 Bancroft Pkwy",
+    city: "Wilmington, DE 19805",
+    score: 67,
+    tier: "WARM",
+    stage: "contacted",
+    stageLabel: "Contacted",
+    stageBadgeClass: "badge-contacted",
+    categories: ["Vacant", "Code Violation"],
+    stacked: false,
+    followUp: "Apr 10, 2026",
+    skipTrace: true,
+    comps: true,
+    offer: false,
+  },
+  {
+    id: 4,
+    address: "2241 N Market St",
+    city: "Wilmington, DE 19802",
+    score: 71,
+    tier: "WARM",
+    stage: "offer",
+    stageLabel: "Offer Out",
+    stageBadgeClass: "badge-offer",
+    categories: ["Absentee Owner", "High Equity"],
+    stacked: true,
+    stackCount: 2,
+    followUp: "Apr 4, 2026",
+    skipTrace: true,
+    comps: true,
+    offer: true,
+  },
+  {
+    id: 5,
+    address: "519 E 14th St",
+    city: "Wilmington, DE 19802",
+    score: 44,
+    tier: "COOL",
+    stage: "new",
+    stageLabel: "New",
+    stageBadgeClass: "badge-new",
+    categories: ["Tax Delinquent"],
+    stacked: false,
+    followUp: "Apr 15, 2026",
+    skipTrace: false,
+    comps: false,
+    offer: false,
+  },
+  {
+    id: 6,
+    address: "834 W 6th St",
+    city: "Wilmington, DE 19801",
+    score: 38,
+    tier: "COOL",
+    stage: "contacted",
+    stageLabel: "Contacted",
+    stageBadgeClass: "badge-contacted",
+    categories: ["Vacant", "Absentee Owner"],
+    stacked: false,
+    followUp: "Apr 12, 2026",
+    skipTrace: true,
+    comps: false,
+    offer: false,
+  },
+  {
+    id: 7,
+    address: "1105 Clifford Brown Walk",
+    city: "Wilmington, DE 19801",
+    score: 23,
+    tier: "COLD",
+    stage: "new",
+    stageLabel: "New",
+    stageBadgeClass: "badge-new",
+    categories: ["Pre-Probate"],
+    stacked: false,
+    followUp: "Apr 20, 2026",
+    skipTrace: false,
+    comps: false,
+    offer: false,
+  },
+  {
+    id: 8,
+    address: "305 W 28th St",
+    city: "Wilmington, DE 19802",
+    score: 59,
+    tier: "WARM",
+    stage: "negotiating",
+    stageLabel: "Negotiating",
+    stageBadgeClass: "badge-negotiating",
+    categories: ["High Equity", "Code Violation"],
+    stacked: false,
+    followUp: "Apr 5, 2026",
+    skipTrace: true,
+    comps: true,
+    offer: true,
+  },
+];
+
+// ─────────────────────────────────────
+// TIER HELPERS
+// ─────────────────────────────────────
+function tierClass(tier) {
+  return { HOT: 'tier-hot', WARM: 'tier-warm', COOL: 'tier-cool', COLD: 'tier-cold' }[tier] || '';
+}
+
+function scoreClass(tier) {
+  return { HOT: 'score-hot', WARM: 'score-warm', COOL: 'score-cool', COLD: 'score-cold' }[tier] || '';
+}
+
+function tierModalColor(tier) {
+  return { HOT: '#DC2626', WARM: '#D97706', COOL: '#2563EB', COLD: '#6B7280' }[tier] || '#8A8074';
+}
+
+// ─────────────────────────────────────
+// RENDER CARDS
+// ─────────────────────────────────────
+let currentFilter = 'all';
+
+function renderCards(filter) {
+  currentFilter = filter;
+  const grid = document.getElementById('leadsGrid');
+  grid.innerHTML = '';
+
+  const filtered = leads.filter(l => {
+    if (filter === 'all') return true;
+    if (filter === 'hot') return l.tier === 'HOT';
+    if (filter === 'warm') return l.tier === 'WARM';
+    if (filter === 'new') return l.stage === 'new';
+    if (filter === 'contacted') return l.stage === 'contacted';
+    if (filter === 'appt') return l.stage === 'appt';
+    if (filter === 'offer') return l.stage === 'offer';
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-leads">No leads match this filter.</div>';
+    return;
+  }
+
+  filtered.forEach((lead, i) => {
+    const isHotWarm = lead.tier === 'HOT' || lead.tier === 'WARM';
+
+    const tagsHtml = lead.categories.map(t => `<span class="card-tag">${t}</span>`).join('');
+    const stackedNote = lead.stacked
+      ? `<span class="card-tag-note">${lead.stackCount} categories</span>`
+      : '';
+
+    const indCheck = (done) =>
+      `<span class="indicator-check ${done ? 'check-done' : 'check-pending'}">${done ? '✓' : '·'}</span>`;
+
+    const card = document.createElement('div');
+    card.className = `lead-card${isHotWarm ? (lead.tier === 'HOT' ? ' hot-card' : ' warm-card') : ''}`;
+    card.style.transitionDelay = `${i * 50}ms`;
+    card.dataset.leadId = lead.id;
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="card-tier-block">
+          <span class="card-tier-label ${tierClass(lead.tier)}">${lead.tier}</span>
+          <span class="card-score ${scoreClass(lead.tier)}">${lead.score}</span>
+        </div>
+        <span class="stage-badge ${lead.stageBadgeClass}">${lead.stageLabel}</span>
+      </div>
+      <div class="card-address">${lead.address}</div>
+      <div class="card-tags">
+        ${tagsHtml}
+        ${stackedNote}
+      </div>
+      <div class="card-meta">
+        <div class="card-meta-item">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1.5C5.52 1.5 3.5 3.52 3.5 6c0 3.75 4.5 8.5 4.5 8.5S12.5 9.75 12.5 6c0-2.48-2.02-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.3"/>
+            <circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+          ${lead.city}
+        </div>
+        <div class="card-meta-item${lead.overdue ? ' style="color:#8B1A1A;"' : ''}">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          <span ${lead.overdue ? 'style="color:#8B1A1A;font-weight:500;"' : ''}>
+            Follow-up: ${lead.followUp}${lead.overdue ? ' ⚠' : ''}
+          </span>
+        </div>
+      </div>
+      <div class="card-indicators">
+        <div class="card-indicator">
+          ${indCheck(lead.skipTrace)}
+          Skip Trace
+        </div>
+        <div class="card-indicator">
+          ${indCheck(lead.comps)}
+          Comps
+        </div>
+        <div class="card-indicator">
+          ${indCheck(lead.offer)}
+          Offer
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => openModal(lead.id));
+    grid.appendChild(card);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        card.classList.add('visible');
+      });
+    });
+  });
+}
+
+// ─────────────────────────────────────
+// FILTER PILLS
+// ─────────────────────────────────────
+document.querySelectorAll('.filter-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards(btn.dataset.filter);
+  });
+});
+
+// ─────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────
+function openModal(leadId) {
+  const lead = leads.find(l => l.id === leadId);
+  if (!lead) return;
+
+  // Set header
+  document.getElementById('modalAddress').textContent = lead.address;
+
+  const badgesEl = document.getElementById('modalBadges');
+  const color = tierModalColor(lead.tier);
+  badgesEl.innerHTML = `
+    <span class="modal-tier" style="color:${color}">${lead.tier}</span>
+    <span class="modal-score-badge" style="background:${color}18;color:${color};">${lead.score}</span>
+    <span class="stage-badge ${lead.stageBadgeClass}">${lead.stageLabel}</span>
+    ${lead.categories.map(c => `<span class="card-tag">${c}</span>`).join('')}
+  `;
+
+  // Reset to first tab
+  setTab('info');
+
+  const overlay = document.getElementById('modalOverlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  const overlay = document.getElementById('modalOverlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === e.currentTarget) closeModal();
+}
+
+// ─────────────────────────────────────
+// TABS
+// ─────────────────────────────────────
+function setTab(tabId) {
+  document.querySelectorAll('.modal-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id === `panel-${tabId}`);
+  });
+}
+
+document.querySelectorAll('.modal-tab').forEach(tab => {
+  tab.addEventListener('click', () => setTab(tab.dataset.tab));
+});
+
+// ─────────────────────────────────────
+// CRM STAGE BUTTONS
+// ─────────────────────────────────────
+function setCrmStage(btn) {
+  document.querySelectorAll('.crm-stage-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ─────────────────────────────────────
+// OFFER CALC
+// ─────────────────────────────────────
+function calcOffer() {
+  const arv = parseFloat(document.getElementById('offerArv').value) || 0;
+  const repair = parseFloat(document.getElementById('offerRepair').value) || 0;
+  const fee = parseFloat(document.getElementById('offerFee').value) || 0;
+  const closingPct = parseFloat(document.getElementById('offerClosing').value) || 0;
+  const marginPct = parseFloat(document.getElementById('offerMargin').value) || 0;
+  const holding = parseFloat(document.getElementById('offerHolding').value) || 0;
+
+  const closingCost = arv * (closingPct / 100);
+  const profit = arv * (marginPct / 100);
+  const mao = arv - repair - profit - closingCost - fee - holding;
+
+  const fmt = (n) => '$' + Math.max(0, Math.round(n)).toLocaleString('en-US');
+
+  document.getElementById('offerMax').textContent = fmt(mao);
+  document.getElementById('offerBreakdown').textContent =
+    `ARV ${fmt(arv)} − Repairs ${fmt(repair)} − Profit ${fmt(profit)} − Costs ${fmt(closingCost + fee + holding)}`;
+}
+
+// ─────────────────────────────────────
+// SIDEBAR NAV
+// ─────────────────────────────────────
+function setNav(btn) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ─────────────────────────────────────
+// KEYBOARD
+// ─────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ─────────────────────────────────────
+// INIT
+// ─────────────────────────────────────
+renderCards('all');
+calcOffer();
+</script>
+</body>
+</html>

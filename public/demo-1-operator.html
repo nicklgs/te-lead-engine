@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TE Lead Engine — The Operator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080D1A;
+  --surface: #0F1629;
+  --surface2: #131D33;
+  --border: #1E2D4A;
+  --border2: #243352;
+  --gold: #B8985A;
+  --gold-dim: #8A7040;
+  --gold-bright: #D4AF6A;
+  --gold-glow: rgba(184,152,90,0.35);
+  --red: #8B1A1A;
+  --red-bright: #DC2626;
+  --red-glow: rgba(220,38,38,0.3);
+  --green: #2D7A4F;
+  --green-bright: #10b981;
+  --orange: #B85C1A;
+  --orange-bright: #F97316;
+  --blue: #1A3D8B;
+  --blue-bright: #3B82F6;
+  --text: #F4EFE7;
+  --text-muted: #6B7BA4;
+  --text-dim: #3D4F70;
+  --font-head: 'Cinzel', serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+  --panel-w: 390px;
+  --radius: 4px;
+  --radius-sm: 2px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  overflow-x: hidden;
+}
+
+/* SCROLLBARS */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+/* ========== HEADER ========== */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.monogram {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+
+.brand { display: flex; flex-direction: column; line-height: 1; }
+.brand-name {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 3px;
+  margin-top: 3px;
+}
+
+.header-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.nav { display: flex; gap: 4px; align-items: center; }
+.nav-link {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: color 0.15s, background 0.15s;
+  text-transform: uppercase;
+  border: none;
+  background: none;
+}
+.nav-link:hover { color: var(--text); background: var(--border); }
+.nav-link.active { color: var(--gold); }
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--green-bright);
+  letter-spacing: 1px;
+}
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-bright);
+  box-shadow: 0 0 6px var(--green-bright);
+  animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green-bright); }
+  50% { opacity: 0.6; box-shadow: 0 0 12px var(--green-bright); }
+}
+
+.lead-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bg);
+  cursor: pointer;
+}
+
+/* ========== ALERT BANNER ========== */
+.alert-banner {
+  background: linear-gradient(90deg, #2D0808, #1A0404);
+  border-bottom: 1px solid var(--red);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #F87171;
+  letter-spacing: 0.5px;
+  animation: alert-pulse 3s infinite;
+  transition: all 0.3s;
+}
+.alert-banner.dismissed { display: none; }
+@keyframes alert-pulse {
+  0%, 100% { border-color: var(--red); }
+  50% { border-color: var(--red-bright); }
+}
+.alert-icon { font-size: 13px; flex-shrink: 0; }
+.alert-text { flex: 1; }
+.alert-text strong { color: var(--red-bright); }
+.alert-dismiss {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #4B1C1C;
+  background: none;
+  color: #F87171;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.alert-dismiss:hover { background: var(--red-bright); color: white; border-color: var(--red-bright); }
+
+/* ========== MAIN LAYOUT ========== */
+.main-wrap {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 56px);
+  overflow: hidden;
+}
+
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ========== STATS ROW ========== */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold-dim);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-top-color 0.2s;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(180deg, rgba(184,152,90,0.06) 0%, transparent 100%);
+  pointer-events: none;
+}
+.stat-card:hover { border-top-color: var(--gold); }
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-value.gold { color: var(--gold); text-shadow: 0 0 20px var(--gold-glow); }
+.stat-value.hot { color: var(--orange-bright); text-shadow: 0 0 15px rgba(249,115,22,0.4); }
+
+.stat-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--green-bright);
+}
+.stat-trend.down { color: var(--red-bright); }
+
+/* Circular gauge */
+.stat-gauge-wrap { display: flex; align-items: flex-end; gap: 12px; }
+.gauge-svg { flex-shrink: 0; }
+.gauge-track { fill: none; stroke: var(--border2); stroke-width: 4; }
+.gauge-fill {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1);
+  transform-origin: center;
+  transform: rotate(-90deg);
+}
+
+/* ========== SECTION HEADER ========== */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.section-title {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ========== KANBAN BOARD ========== */
+.kanban-outer {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.kanban-board {
+  display: flex;
+  gap: 14px;
+  min-width: max-content;
+}
+
+.kanban-col {
+  width: 230px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.col-name {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.col-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--border);
+  border-radius: 10px;
+  padding: 2px 7px;
+}
+
+/* ========== LEAD CARD ========== */
+.lead-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  overflow: hidden;
+}
+
+.lead-card:hover { transform: translateY(-1px); }
+
+.lead-card.tier-hot {
+  border-left: 3px solid var(--gold);
+  box-shadow: 0 0 8px var(--gold-glow), inset 0 0 20px rgba(184,152,90,0.04);
+}
+.lead-card.tier-hot:hover {
+  box-shadow: 0 0 16px rgba(184,152,90,0.5), inset 0 0 20px rgba(184,152,90,0.06);
+}
+.lead-card.tier-warm {
+  border-left: 3px solid var(--orange-bright);
+  box-shadow: inset 0 0 20px rgba(249,115,22,0.03);
+}
+.lead-card.tier-warm:hover {
+  box-shadow: 0 0 12px rgba(249,115,22,0.2);
+}
+.lead-card.tier-cool {
+  border-left: 3px solid var(--blue-bright);
+}
+.lead-card.tier-cool:hover {
+  box-shadow: 0 0 10px rgba(59,130,246,0.2);
+}
+.lead-card.tier-cold {
+  border-left: 3px solid var(--text-dim);
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 6px;
+}
+
+.card-address {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stage-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 1px;
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.stage-new { background: rgba(59,130,246,0.15); color: var(--blue-bright); border: 1px solid rgba(59,130,246,0.2); }
+.stage-contacted { background: rgba(184,152,90,0.12); color: var(--gold); border: 1px solid rgba(184,152,90,0.2); }
+.stage-appointment { background: rgba(249,115,22,0.12); color: var(--orange-bright); border: 1px solid rgba(249,115,22,0.2); }
+.stage-offer { background: rgba(16,185,129,0.12); color: var(--green-bright); border: 1px solid rgba(16,185,129,0.2); }
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(107,123,164,0.12);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.tag-stack {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  background: rgba(184,152,90,0.1);
+  color: var(--gold-dim);
+  border: 1px solid rgba(184,152,90,0.15);
+}
+
+.card-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.score-num {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+.score-num.hot { color: var(--gold); text-shadow: 0 0 10px var(--gold-glow); }
+.score-num.warm { color: var(--orange-bright); }
+.score-num.cool { color: var(--blue-bright); }
+.score-num.cold { color: var(--text-muted); }
+
+.score-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.score-label.hot { color: var(--gold); }
+.score-label.warm { color: var(--orange-bright); }
+.score-label.cool { color: var(--blue-bright); }
+.score-label.cold { color: var(--text-muted); }
+
+.score-bar-wrap {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.score-bar {
+  height: 100%;
+  border-radius: 2px;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+.score-bar.hot { background: linear-gradient(90deg, var(--gold-dim), var(--gold)); }
+.score-bar.warm { background: linear-gradient(90deg, var(--orange), var(--orange-bright)); }
+.score-bar.cool { background: linear-gradient(90deg, var(--blue), var(--blue-bright)); }
+.score-bar.cold { background: var(--text-dim); }
+
+.card-data-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.data-dot {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.5px;
+}
+.dot-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.dot-indicator.on { background: var(--green-bright); box-shadow: 0 0 4px var(--green-bright); }
+.dot-indicator.off { background: var(--text-dim); }
+.data-dot span { color: var(--text-dim); }
+.data-dot.on span { color: var(--text-muted); }
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-time {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+.overdue-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--red-bright);
+  background: rgba(220,38,38,0.12);
+  border: 1px solid rgba(220,38,38,0.25);
+  border-radius: var(--radius-sm);
+  padding: 2px 5px;
+  letter-spacing: 1px;
+  animation: overdue-pulse 2s infinite;
+}
+@keyframes overdue-pulse {
+  0%, 100% { border-color: rgba(220,38,38,0.25); }
+  50% { border-color: rgba(220,38,38,0.6); }
+}
+
+/* ========== DETAIL PANEL ========== */
+.panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8,13,26,0.5);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+  backdrop-filter: blur(2px);
+}
+.panel-overlay.open { opacity: 1; pointer-events: auto; }
+
+.detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--panel-w);
+  height: 100vh;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+}
+.detail-panel.open { transform: translateX(0); }
+
+.panel-header {
+  padding: 16px 18px 0;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panel-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.panel-address {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  flex: 1;
+  padding-right: 12px;
+}
+.panel-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.panel-close:hover { background: var(--red); color: white; border-color: var(--red); }
+
+.panel-tabs {
+  display: flex;
+  gap: 0;
+  margin-top: 4px;
+}
+.panel-tab {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  padding: 8px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+.panel-tab:hover { color: var(--text); }
+.panel-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+}
+
+/* ========== TAB CONTENT ========== */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.field-group { margin-bottom: 16px; }
+.field-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.field-value {
+  font-size: 13px;
+  color: var(--text);
+}
+.field-value.mono { font-family: var(--font-mono); }
+
+.panel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.panel-tag {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(107,123,164,0.1);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.panel-score-block {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.panel-score-num {
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--orange-bright);
+}
+.panel-score-num.hot { color: var(--gold); text-shadow: 0 0 15px var(--gold-glow); }
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.freshness-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.freshness-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.freshness-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.freshness-dot.on { background: var(--green-bright); box-shadow: 0 0 5px var(--green-bright); }
+.freshness-dot.off { background: var(--text-dim); }
+.freshness-label { color: var(--text); flex: 1; }
+.freshness-age { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
+
+/* Skip Trace */
+.phone-link {
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 4px;
+  transition: color 0.15s, text-shadow 0.15s;
+}
+.phone-link:hover { color: var(--gold-bright); text-shadow: 0 0 8px var(--gold-glow); }
+
+.lookup-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.lookup-btn {
+  display: block;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+}
+.lookup-btn:hover { border-color: var(--gold-dim); color: var(--gold); background: rgba(184,152,90,0.05); }
+
+/* Comps */
+.arv-display {
+  text-align: center;
+  padding: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+}
+.arv-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.arv-value {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 0 20px var(--gold-glow);
+}
+.confidence-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+.confidence-high { background: rgba(16,185,129,0.15); color: var(--green-bright); border: 1px solid rgba(16,185,129,0.25); }
+
+.comps-table { width: 100%; border-collapse: collapse; }
+.comps-table th {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-align: left;
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+}
+.comps-table td {
+  font-size: 11px;
+  color: var(--text);
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.comps-table tr:last-child td { border-bottom: none; }
+.comps-table td.mono { font-family: var(--font-mono); font-size: 10px; }
+.comps-table td.gold { color: var(--gold); font-family: var(--font-mono); font-size: 11px; }
+
+/* CRM tab */
+.stage-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.stage-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text-muted);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.stage-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.stage-btn.active { background: rgba(184,152,90,0.15); border-color: var(--gold); color: var(--gold); }
+
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.timeline-item {
+  display: flex;
+  gap: 10px;
+  position: relative;
+  padding-bottom: 14px;
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.timeline-line {
+  position: absolute;
+  left: 12px;
+  top: 26px;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+.timeline-item:last-child .timeline-line { display: none; }
+.timeline-body { flex: 1; padding-top: 4px; }
+.timeline-action { font-size: 12px; color: var(--text); margin-bottom: 2px; }
+.timeline-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.note-input-wrap {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.note-textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 10px 12px;
+  resize: none;
+  height: 70px;
+  transition: border-color 0.15s;
+  outline: none;
+}
+.note-textarea:focus { border-color: var(--gold-dim); }
+.note-textarea::placeholder { color: var(--text-dim); }
+
+.add-note-btn {
+  align-self: flex-end;
+  padding: 7px 14px;
+  background: rgba(184,152,90,0.12);
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius);
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+.add-note-btn:hover { background: rgba(184,152,90,0.2); box-shadow: 0 0 8px var(--gold-glow); }
+.add-note-btn.success { background: rgba(16,185,129,0.15); border-color: var(--green-bright); color: var(--green-bright); }
+
+/* Offer tab */
+.offer-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+}
+.offer-field-label { font-size: 12px; color: var(--text-muted); }
+.offer-field-input {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: right;
+  width: 100px;
+  outline: none;
+  cursor: pointer;
+}
+.offer-field-input:focus { color: var(--gold); }
+.offer-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+.max-offer-block {
+  background: linear-gradient(135deg, rgba(184,152,90,0.1), rgba(184,152,90,0.05));
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(184,152,90,0.1);
+  margin-bottom: 12px;
+}
+.max-offer-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold-dim);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.max-offer-value {
+  font-family: var(--font-mono);
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 0 25px var(--gold-glow);
+  line-height: 1;
+}
+.offer-formula {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  line-height: 1.8;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .kanban-board { flex-direction: column; min-width: unset; }
+  .kanban-col { width: 100%; }
+  .detail-panel { width: 100%; }
+  .nav { display: none; }
+}
+
+/* ========== UTILITY ========== */
+.divider { height: 1px; background: var(--border); margin: 12px 0; }
+.text-muted { color: var(--text-muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="monogram">TE</div>
+  <div class="brand">
+    <div class="brand-name">TE HOME BUYERS</div>
+    <div class="brand-sub">LEAD ENGINE</div>
+  </div>
+  <div class="header-divider"></div>
+  <nav class="nav">
+    <button class="nav-link active">Dashboard</button>
+    <button class="nav-link">Leads</button>
+    <button class="nav-link">Scrub</button>
+    <button class="nav-link">Buyers</button>
+  </nav>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      LIVE
+    </div>
+    <div class="lead-count">8 leads</div>
+    <div class="header-divider"></div>
+    <div class="avatar">TM</div>
+  </div>
+</header>
+
+<!-- MAIN WRAP -->
+<div class="main-wrap">
+
+  <!-- ALERT BANNER -->
+  <div class="alert-banner" id="alertBanner">
+    <span class="alert-icon">⚠</span>
+    <span class="alert-text">
+      <strong>1 OVERDUE FOLLOW-UP</strong> — 120 Lansdowne Ave · Expired Listing · Due 4/1/2026
+    </span>
+    <button class="alert-dismiss" onclick="document.getElementById('alertBanner').classList.add('dismissed')">×</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content-area">
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-value">8</div>
+        <div class="stat-trend">▲ +2 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Hot Leads</div>
+        <div class="stat-value hot">2</div>
+        <div class="stat-trend">▲ Score 70+</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pipeline Value</div>
+        <div class="stat-value gold">$166K</div>
+        <div class="stat-trend">▲ Est. ARV total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Score</div>
+        <div class="stat-gauge-wrap">
+          <svg class="gauge-svg" width="48" height="48" viewBox="0 0 48 48">
+            <circle class="gauge-track" cx="24" cy="24" r="18" stroke-dasharray="113" stroke-dashoffset="0"/>
+            <circle class="gauge-fill" id="gaugeFill" cx="24" cy="24" r="18" stroke-dasharray="113"/>
+          </svg>
+          <div>
+            <div class="stat-value" style="font-size:22px">46</div>
+            <div class="stat-trend" style="color:var(--text-muted)">/ 100</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE KANBAN -->
+    <div>
+      <div class="section-header">
+        <div class="section-title">Pipeline</div>
+        <div class="section-line"></div>
+      </div>
+      <div class="kanban-outer">
+        <div class="kanban-board" id="kanbanBoard">
+          <!-- Columns injected by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /main-wrap -->
+
+<!-- OVERLAY -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-panel" id="detailPanel">
+  <div class="panel-header">
+    <div class="panel-header-top">
+      <div class="panel-address" id="panelAddress">412 W 3rd St, Chester, PA 19013</div>
+      <button class="panel-close" onclick="closePanel()">×</button>
+    </div>
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="switchTab('info',this)">Info</button>
+      <button class="panel-tab" onclick="switchTab('skiptrace',this)">Skip Trace</button>
+      <button class="panel-tab" onclick="switchTab('comps',this)">Comps</button>
+      <button class="panel-tab" onclick="switchTab('crm',this)">CRM</button>
+      <button class="panel-tab" onclick="switchTab('offer',this)">Offer</button>
+    </div>
+  </div>
+  <div class="panel-body">
+
+    <!-- INFO TAB -->
+    <div class="tab-content active" id="tab-info">
+      <div class="panel-tags" id="panelTags"></div>
+      <div class="panel-score-block">
+        <div>
+          <div class="panel-score-num" id="panelScoreNum">73</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:1.5px;margin-bottom:6px" id="panelScoreLbl">WARM</div>
+          <div class="score-bar-wrap" style="margin-bottom:0">
+            <div class="score-bar warm" id="panelScoreBar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="info-grid" id="infoGrid"></div>
+      <div class="field-group">
+        <div class="field-label">Details</div>
+        <div class="field-value" id="panelDetails" style="font-size:12px;line-height:1.6;color:var(--text-muted)"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="field-group">
+        <div class="field-label">Data Freshness</div>
+        <div class="freshness-row" id="freshnessRow"></div>
+      </div>
+    </div>
+
+    <!-- SKIP TRACE TAB -->
+    <div class="tab-content" id="tab-skiptrace">
+      <div id="stContent"></div>
+    </div>
+
+    <!-- COMPS TAB -->
+    <div class="tab-content" id="tab-comps">
+      <div id="compsContent"></div>
+    </div>
+
+    <!-- CRM TAB -->
+    <div class="tab-content" id="tab-crm">
+      <div class="field-label" style="margin-bottom:8px">Pipeline Stage</div>
+      <div class="stage-selector" id="stageSelector"></div>
+      <div class="field-group">
+        <div class="field-label">Follow-Up Date</div>
+        <div class="field-value mono" id="followUpDate">4/4/2026</div>
+      </div>
+      <div class="divider"></div>
+      <div class="field-label" style="margin-bottom:10px">Activity</div>
+      <div class="timeline" id="activityTimeline"></div>
+      <div class="note-input-wrap">
+        <textarea class="note-textarea" placeholder="Add a note or log contact…" id="noteInput"></textarea>
+        <button class="add-note-btn" id="addNoteBtn" onclick="addNote()">+ Add Note</button>
+      </div>
+    </div>
+
+    <!-- OFFER TAB -->
+    <div class="tab-content" id="tab-offer">
+      <div id="offerContent"></div>
+    </div>
+
+  </div><!-- /panel-body -->
+</div><!-- /detail-panel -->
+
+<script>
+// ============================================================
+// LEAD DATA
+// ============================================================
+const LEADS = [
+  {
+    id: 1,
+    address: '412 W 3rd St',
+    city: 'Chester, PA 19013',
+    stage: 'contacted',
+    score: 73,
+    tier: 'warm',
+    categories: ['🏚️ Pre-Foreclosure','💰 Tax Delinquent'],
+    source: 'List Pull — Apr 2026',
+    overdue: false,
+    age: '2d ago',
+    data: { st: true, cp: true, of: false },
+    details: 'Owner behind 9 months on mortgage. Tax lien filed 2024. Property shows signs of deferred maintenance. Owner confirmed contact via voicemail.',
+    freshness: [
+      { label: 'Skip Trace', on: true, age: '3 days ago' },
+      { label: 'Comps', on: true, age: '5 days ago' },
+      { label: 'Offer Calc', on: false, age: 'Not run' },
+    ],
+    skipTrace: {
+      owner: 'James Wilson',
+      phones: ['(484) 555-0142','(610) 555-0398'],
+      email: 'james.wilson@gmail.com',
+      mailing: '412 W 3rd St, Chester, PA 19013',
+      relatives: ['Patricia Wilson','Michael Wilson'],
+      notes: 'Owner confirmed living at property. Mentioned financial hardship. Open to conversation.',
+    },
+    comps: {
+      arv: '$95,000',
+      confidence: 'HIGH',
+      sales: [
+        { address: '388 W 4th St', price: '$88,000', date: 'Jan 2026', bed: '3/1', sqft: '1,240' },
+        { address: '501 Flower St', price: '$97,500', date: 'Feb 2026', bed: '3/1.5', sqft: '1,310' },
+        { address: '290 Madison St', price: '$91,000', date: 'Mar 2026', bed: '3/1', sqft: '1,190' },
+      ],
+    },
+    crm: {
+      stage: 'contacted',
+      followUp: '4/4/2026',
+      timeline: [
+        { icon: '📋', action: 'Lead added from list pull', meta: 'Mar 28, 2026 · System' },
+        { icon: '🔍', action: 'Skip trace completed', meta: 'Mar 29, 2026 · Auto' },
+        { icon: '📞', action: 'Called — left voicemail', meta: 'Mar 30, 2026 · Tom M.' },
+        { icon: '📊', action: 'Comps pulled — ARV $95K', meta: 'Mar 31, 2026 · Tom M.' },
+      ],
+    },
+    offer: { arv: 95000, repairs: 15000, fee: 8000, holding: 3000 },
+  },
+  {
+    id: 2,
+    address: '120 Lansdowne Ave',
+    city: 'Lansdowne, PA 19050',
+    stage: 'new',
+    score: 82,
+    tier: 'hot',
+    categories: ['📋 Expired Listing'],
+    source: 'MLS Scrape — Apr 2026',
+    overdue: true,
+    age: '1d ago',
+    data: { st: true, cp: false, of: false },
+    details: 'Listed for 142 days, expired Feb 2026. Owner attempted FSBO, no success. Property is vacant per drive-by. Motivated seller indicator: multiple price reductions.',
+    freshness: [
+      { label: 'Skip Trace', on: true, age: '1 day ago' },
+      { label: 'Comps', on: false, age: 'Not run' },
+      { label: 'Offer Calc', on: false, age: 'Not run' },
+    ],
+    skipTrace: {
+      owner: 'Sandra & Robert Okafor',
+      phones: ['(215) 555-0774','(267) 555-0391'],
+      email: 'robert.okafor@outlook.com',
+      mailing: '842 Elm Terrace, Havertown, PA 19083',
+      relatives: ['David Okafor','Linda Okafor'],
+      notes: 'Owners relocated to Havertown. Property is vacant. Robert is the primary contact.',
+    },
+    comps: {
+      arv: '$115,000',
+      confidence: 'MEDIUM',
+      sales: [
+        { address: '115 Beverly Blvd', price: '$108,000', date: 'Feb 2026', bed: '3/2', sqft: '1,450' },
+        { address: '205 Lansdowne Ave', price: '$119,500', date: 'Jan 2026', bed: '4/2', sqft: '1,600' },
+        { address: '78 Berkley Rd', price: '$112,000', date: 'Mar 2026', bed: '3/1.5', sqft: '1,380' },
+      ],
+    },
+    crm: {
+      stage: 'new',
+      followUp: '4/1/2026',
+      timeline: [
+        { icon: '📋', action: 'Lead added from MLS scrape', meta: 'Apr 1, 2026 · System' },
+        { icon: '🔍', action: 'Skip trace completed', meta: 'Apr 1, 2026 · Auto' },
+        { icon: '⚠️', action: 'Follow-up OVERDUE', meta: 'Apr 2, 2026 · System Alert' },
+      ],
+    },
+    offer: { arv: 115000, repairs: 22000, fee: 10000, holding: 4500 },
+  },
+  {
+    id: 3,
+    address: '3317 Kensington Ave',
+    city: 'Philadelphia, PA 19134',
+    stage: 'appointment',
+    score: 91,
+    tier: 'hot',
+    categories: ['💀 Probate','💰 Tax Delinquent'],
+    source: 'Probate Court — Mar 2026',
+    overdue: false,
+    age: '7d ago',
+    data: { st: true, cp: true, of: true },
+    details: 'Estate sale. Heir (daughter) lives out of state and wants quick close. Tax delinquent $4,200. Property has significant deferred maintenance. Appointment set for 4/5.',
+    freshness: [
+      { label: 'Skip Trace', on: true, age: '7 days ago' },
+      { label: 'Comps', on: true, age: '6 days ago' },
+      { label: 'Offer Calc', on: true, age: '5 days ago' },
+    ],
+    skipTrace: {
+      owner: 'Estate of Harold Burke',
+      phones: ['(856) 555-0218'],
+      email: 'mburke.heir@gmail.com',
+      mailing: '42 Windmill Ln, Cherry Hill, NJ 08002',
+      relatives: ['Margaret Burke (heir)'],
+      notes: 'Margaret is cooperative and motivated. Inherited from father who passed Jan 2026. Wants to close by end of Q2.',
+    },
+    comps: {
+      arv: '$78,000',
+      confidence: 'HIGH',
+      sales: [
+        { address: '3280 Kensington Ave', price: '$74,000', date: 'Feb 2026', bed: '2/1', sqft: '980' },
+        { address: '3401 N Coral St', price: '$80,000', date: 'Jan 2026', bed: '3/1', sqft: '1,050' },
+        { address: '3199 Frankford Ave', price: '$76,500', date: 'Mar 2026', bed: '2/1', sqft: '1,010' },
+      ],
+    },
+    crm: {
+      stage: 'appointment',
+      followUp: '4/5/2026',
+      timeline: [
+        { icon: '📋', action: 'Lead added — Probate Court', meta: 'Mar 26, 2026 · Tom M.' },
+        { icon: '🔍', action: 'Skip trace completed', meta: 'Mar 26, 2026 · Auto' },
+        { icon: '📞', action: 'Called Margaret — long conversation, very motivated', meta: 'Mar 27, 2026 · Tom M.' },
+        { icon: '📊', action: 'Comps pulled — ARV $78K', meta: 'Mar 27, 2026 · Tom M.' },
+        { icon: '🧮', action: 'Offer calc run — Max $28,600', meta: 'Mar 28, 2026 · Tom M.' },
+        { icon: '📅', action: 'Walkthrough scheduled Apr 5', meta: 'Mar 29, 2026 · Tom M.' },
+      ],
+    },
+    offer: { arv: 78000, repairs: 18000, fee: 7000, holding: 2900 },
+  },
+  {
+    id: 4,
+    address: '504 Maple St',
+    city: 'Sharon Hill, PA 19079',
+    stage: 'new',
+    score: 38,
+    tier: 'cool',
+    categories: ['🏠 Absentee Owner'],
+    source: 'County Records — Mar 2026',
+    overdue: false,
+    age: '5d ago',
+    data: { st: false, cp: false, of: false },
+    details: 'Owner mailing address differs from property. Purchased 2019, no improvements permitted. Rental property possibly vacant.',
+    freshness: [
+      { label: 'Skip Trace', on: false, age: 'Not run' },
+      { label: 'Comps', on: false, age: 'Not run' },
+      { label: 'Offer Calc', on: false, age: 'Not run' },
+    ],
+    skipTrace: { owner: 'N/A — Not Run', phones: [], email: '', mailing: '', relatives: [], notes: 'Skip trace not yet performed.' },
+    comps: { arv: 'TBD', confidence: 'LOW', sales: [] },
+    crm: {
+      stage: 'new',
+      followUp: '4/10/2026',
+      timeline: [
+        { icon: '📋', action: 'Lead added from county pull', meta: 'Mar 28, 2026 · System' },
+      ],
+    },
+    offer: { arv: 0, repairs: 0, fee: 0, holding: 0 },
+  },
+  {
+    id: 5,
+    address: '87 Grant Ave',
+    city: 'Collingdale, PA 19023',
+    stage: 'new',
+    score: 29,
+    tier: 'cold',
+    categories: ['📬 Direct Mail Response'],
+    source: 'Mail Campaign — Mar 2026',
+    overdue: false,
+    age: '3d ago',
+    data: { st: true, cp: false, of: false },
+    details: 'Owner responded to yellow letter. Said not interested but open to future contact. Low motivation at this time.',
+    freshness: [
+      { label: 'Skip Trace', on: true, age: '3 days ago' },
+      { label: 'Comps', on: false, age: 'Not run' },
+      { label: 'Offer Calc', on: false, age: 'Not run' },
+    ],
+    skipTrace: {
+      owner: 'Denise Holloway',
+      phones: ['(610) 555-0519'],
+      email: '',
+      mailing: '87 Grant Ave, Collingdale, PA 19023',
+      relatives: ['Terrence Holloway'],
+      notes: 'Owner responded to direct mail. Not urgently motivated. Follow up in 60 days.',
+    },
+    comps: { arv: 'TBD', confidence: 'LOW', sales: [] },
+    crm: {
+      stage: 'new',
+      followUp: '6/2/2026',
+      timeline: [
+        { icon: '📋', action: 'Lead added — mail response', meta: 'Mar 30, 2026 · Tom M.' },
+        { icon: '📞', action: 'Brief call — not motivated now', meta: 'Mar 30, 2026 · Tom M.' },
+        { icon: '🔍', action: 'Skip trace completed', meta: 'Mar 31, 2026 · Auto' },
+      ],
+    },
+    offer: { arv: 0, repairs: 0, fee: 0, holding: 0 },
+  },
+  {
+    id: 6,
+    address: '229 Powell Rd',
+    city: 'Springfield, PA 19064',
+    stage: 'contacted',
+    score: 55,
+    tier: 'warm',
+    categories: ['🏚️ Pre-Foreclosure'],
+    source: 'Foreclosure List — Apr 2026',
+    overdue: false,
+    age: '4d ago',
+    data: { st: true, cp: true, of: false },
+    details: 'NOD filed Mar 2026. Owner behind 5 months. Spoke briefly — considering options. Follow up scheduled.',
+    freshness: [
+      { label: 'Skip Trace', on: true, age: '4 days ago' },
+      { label: 'Comps', on: true, age: '3 days ago' },
+      { label: 'Offer Calc', on: false, age: 'Not run' },
+    ],
+    skipTrace: {
+      owner: 'Carlos Mendez',
+      phones: ['(484) 555-0862','(610) 555-0127'],
+      email: 'cmendez.pa@gmail.com',
+      mailing: '229 Powell Rd, Springfield, PA 19064',
+      relatives: ['Maria Mendez'],
+      notes: 'Owner is a single father, facing job loss. Motivated but cautious. Be empathetic.',
+    },
+    comps: {
+      arv: '$148,000',
+      confidence: 'HIGH',
+      sales: [
+        { address: '215 W Woodland Ave', price: '$142,000', date: 'Feb 2026', bed: '3/1.5', sqft: '1,560' },
+        { address: '301 Powell Rd', price: '$151,000', date: 'Jan 2026', bed: '4/2', sqft: '1,720' },
+        { address: '188 Thomson Ave', price: '$145,500', date: 'Mar 2026', bed: '3/2', sqft: '1,590' },
+      ],
+    },
+    crm: {
+      stage: 'contacted',
+      followUp: '4/6/2026',
+      timeline: [
+        { icon: '📋', action: 'Lead added from foreclosure list', meta: 'Mar 29, 2026 · System' },
+        { icon: '🔍', action: 'Skip trace completed', meta: 'Mar 29, 2026 · Auto' },
+        { icon: '📞', action: 'Called — spoke briefly, open to talk', meta: 'Mar 30, 2026 · Tom M.' },
+        { icon: '📊', action: 'Comps pulled — ARV $148K', meta: 'Mar 30, 2026 · Tom M.' },
+      ],
+    },
+    offer: { arv: 148000, repairs: 12000, fee: 9000, holding: 5000 },
+  },
+  {
+    id: 7,
+    address: '1842 Brandywine St',
+    city: 'Chester, PA 19013',
+    stage: 'new',
+    score: 44,
+    tier: 'cool',
+    categories: ['💰 Tax Delinquent','🏠 Absentee Owner'],
+    source: 'County Records — Mar 2026',
+    overdue: false,
+    age: '6d ago',
+    data: { st: false, cp: false, of: false },
+    details: 'Tax lien $6,800 filed. Owner not at property address per mail return. Two categories stacked — higher motivation potential.',
+    freshness: [
+      { label: 'Skip Trace', on: false, age: 'Not run' },
+      { label: 'Comps', on: false, age: 'Not run' },
+      { label: 'Offer Calc', on: false, age: 'Not run' },
+    ],
+    skipTrace: { owner: 'N/A — Not Run', phones: [], email: '', mailing: '', relatives: [], notes: 'Skip trace not yet performed.' },
+    comps: { arv: 'TBD', confidence: 'LOW', sales: [] },
+    crm: {
+      stage: 'new',
+      followUp: '4/8/2026',
+      timeline: [
+        { icon: '📋', action: 'Lead added from county pull', meta: 'Mar 27, 2026 · System' },
+      ],
+    },
+    offer: { arv: 0, repairs: 0, fee: 0, holding: 0 },
+  },
+  {
+    id: 8,
+    address: '770 Cobbs Creek Pkwy',
+    city: 'Philadelphia, PA 19143',
+    stage: 'offer',
+    score: 88,
+    tier: 'hot',
+    categories: ['🏚️ Pre-Foreclosure','💰 Tax Delinquent','📋 Expired Listing'],
+    source: 'Multiple — Mar 2026',
+    overdue: false,
+    age: '12d ago',
+    data: { st: true, cp: true, of: true },
+    details: 'Triple-stacked. NOD filed, $5,200 tax lien, and property was listed 180+ days. Owner confirmed verbally open to our offer. Offer submitted 3/31/2026.',
+    freshness: [
+      { label: 'Skip Trace', on: true, age: '12 days ago' },
+      { label: 'Comps', on: true, age: '10 days ago' },
+      { label: 'Offer Calc', on: true, age: '2 days ago' },
+    ],
+    skipTrace: {
+      owner: 'Tyrone & Angela Davis',
+      phones: ['(267) 555-0934','(215) 555-0641'],
+      email: 'tydavis76@gmail.com',
+      mailing: '770 Cobbs Creek Pkwy, Philadelphia, PA 19143',
+      relatives: ['Jerome Davis','Sheila Watkins'],
+      notes: 'Both owners on deed. Angela is the primary decision-maker. Very motivated — facing foreclosure auction in 60 days.',
+    },
+    comps: {
+      arv: '$128,000',
+      confidence: 'HIGH',
+      sales: [
+        { address: '752 Cobbs Creek Pkwy', price: '$122,000', date: 'Feb 2026', bed: '3/1.5', sqft: '1,380' },
+        { address: '810 S 61st St', price: '$130,000', date: 'Jan 2026', bed: '4/2', sqft: '1,490' },
+        { address: '695 Warrington Ave', price: '$125,500', date: 'Mar 2026', bed: '3/2', sqft: '1,410' },
+      ],
+    },
+    crm: {
+      stage: 'offer',
+      followUp: '4/3/2026',
+      timeline: [
+        { icon: '📋', action: 'Lead added — multi-source match', meta: 'Mar 21, 2026 · Tom M.' },
+        { icon: '🔍', action: 'Skip trace completed', meta: 'Mar 21, 2026 · Auto' },
+        { icon: '📞', action: 'Called Angela — very open to selling', meta: 'Mar 22, 2026 · Tom M.' },
+        { icon: '📊', action: 'Comps pulled — ARV $128K', meta: 'Mar 22, 2026 · Tom M.' },
+        { icon: '🏠', action: 'Property walkthrough completed', meta: 'Mar 25, 2026 · Tom M.' },
+        { icon: '🧮', action: 'Offer calc run — Max $46,600', meta: 'Mar 30, 2026 · Tom M.' },
+        { icon: '📄', action: 'Offer submitted — $44,000', meta: 'Mar 31, 2026 · Tom M.' },
+      ],
+    },
+    offer: { arv: 128000, repairs: 20000, fee: 10000, holding: 5400 },
+  },
+];
+
+const STAGES = ['new','contacted','appointment','offer','closed'];
+const STAGE_LABELS = { new:'New', contacted:'Contacted', appointment:'Appointment', offer:'Offer Made', closed:'Closed' };
+const STAGE_FULL = ['new','contacted','appointment','offer','closed','dead','nurture'];
+
+let activeLead = null;
+
+// ============================================================
+// BUILD KANBAN
+// ============================================================
+function buildKanban() {
+  const board = document.getElementById('kanbanBoard');
+  board.innerHTML = '';
+  STAGES.forEach(stage => {
+    const leads = LEADS.filter(l => l.stage === stage);
+    const col = document.createElement('div');
+    col.className = 'kanban-col';
+    col.innerHTML = `
+      <div class="col-header">
+        <div class="col-name">${STAGE_LABELS[stage]}</div>
+        <div class="col-count">${leads.length}</div>
+      </div>
+    `;
+    leads.forEach(lead => {
+      col.appendChild(buildCard(lead));
+    });
+    if (leads.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-align:center;padding:20px 0;letter-spacing:1px;';
+      empty.textContent = '— empty —';
+      col.appendChild(empty);
+    }
+    board.appendChild(col);
+  });
+}
+
+function buildCard(lead) {
+  const card = document.createElement('div');
+  card.className = `lead-card tier-${lead.tier}`;
+  card.setAttribute('data-id', lead.id);
+
+  const tagDisplay = lead.categories.slice(0, 1).join(' ');
+  const extraTag = lead.categories.length > 1
+    ? `<span class="tag-stack">×${lead.categories.length}</span>` : '';
+
+  const dots = ['ST','CP','OF'].map((d,i) => {
+    const key = ['st','cp','of'][i];
+    const on = lead.data[key];
+    return `<div class="data-dot ${on?'on':''}">
+      <div class="dot-indicator ${on?'on':'off'}"></div>
+      <span>${d}</span>
+    </div>`;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="card-top">
+      <div class="card-address">${lead.address}</div>
+      <div class="stage-badge stage-${lead.stage === 'appointment' ? 'appointment' : lead.stage}">${STAGE_LABELS[lead.stage]}</div>
+    </div>
+    <div class="card-tags">
+      <span class="tag">${tagDisplay}</span>
+      ${extraTag}
+    </div>
+    <div class="card-score-row">
+      <div class="score-num ${lead.tier}">${lead.score}</div>
+      <div>
+        <div class="score-label ${lead.tier}">${lead.tier.toUpperCase()}</div>
+      </div>
+    </div>
+    <div class="score-bar-wrap">
+      <div class="score-bar ${lead.tier}" style="width:0%" data-target="${lead.score}%"></div>
+    </div>
+    <div class="card-data-dots">${dots}</div>
+    <div class="card-footer">
+      <div class="card-time">${lead.age}</div>
+      ${lead.overdue ? '<div class="overdue-badge">OVERDUE</div>' : ''}
+    </div>
+  `;
+
+  card.addEventListener('click', () => openPanel(lead.id));
+  return card;
+}
+
+// ============================================================
+// ANIMATE SCORE BARS
+// ============================================================
+function animateBars() {
+  setTimeout(() => {
+    document.querySelectorAll('.score-bar[data-target]').forEach(bar => {
+      bar.style.width = bar.getAttribute('data-target');
+    });
+  }, 300);
+}
+
+// Gauge animation
+function animateGauge() {
+  const fill = document.getElementById('gaugeFill');
+  const score = 46;
+  const circumference = 113;
+  const offset = circumference - (score / 100) * circumference;
+  setTimeout(() => {
+    fill.style.strokeDashoffset = offset;
+  }, 400);
+}
+
+// ============================================================
+// PANEL
+// ============================================================
+function openPanel(id) {
+  activeLead = LEADS.find(l => l.id === id);
+  if (!activeLead) return;
+  populatePanel(activeLead);
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('detailPanel').classList.add('open');
+  // Reset to info tab
+  switchTab('info', document.querySelector('.panel-tab'));
+  // Animate panel score bar
+  setTimeout(() => {
+    const bar = document.getElementById('panelScoreBar');
+    if (bar) bar.style.width = activeLead.score + '%';
+  }, 350);
+}
+
+function closePanel() {
+  document.getElementById('panelOverlay').classList.remove('open');
+  document.getElementById('detailPanel').classList.remove('open');
+}
+
+function populatePanel(lead) {
+  document.getElementById('panelAddress').textContent = lead.address + ', ' + lead.city;
+
+  // Tags
+  const tagsEl = document.getElementById('panelTags');
+  tagsEl.innerHTML = lead.categories.map(c => `<span class="panel-tag">${c}</span>`).join('');
+
+  // Score
+  const sn = document.getElementById('panelScoreNum');
+  sn.textContent = lead.score;
+  sn.className = `panel-score-num ${lead.tier === 'hot' ? 'hot' : ''}`;
+  document.getElementById('panelScoreLbl').textContent = lead.tier.toUpperCase();
+  const bar = document.getElementById('panelScoreBar');
+  bar.className = `score-bar ${lead.tier}`;
+  bar.style.width = '0%';
+
+  // Info grid
+  const grid = document.getElementById('infoGrid');
+  grid.innerHTML = `
+    <div class="field-group">
+      <div class="field-label">City / ZIP</div>
+      <div class="field-value">${lead.city}</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Source</div>
+      <div class="field-value">${lead.source}</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Stage</div>
+      <div class="field-value">${STAGE_LABELS[lead.stage]}</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Added</div>
+      <div class="field-value">${lead.age}</div>
+    </div>
+  `;
+
+  document.getElementById('panelDetails').textContent = lead.details;
+
+  // Freshness
+  const fr = document.getElementById('freshnessRow');
+  fr.innerHTML = lead.freshness.map(f => `
+    <div class="freshness-item">
+      <div class="freshness-dot ${f.on?'on':'off'}"></div>
+      <span class="freshness-label">${f.label}</span>
+      <span class="freshness-age">${f.age}</span>
+    </div>
+  `).join('');
+
+  // Skip Trace
+  const st = lead.skipTrace;
+  const stEl = document.getElementById('stContent');
+  const phonesHtml = st.phones.length
+    ? st.phones.map(p => `<a class="phone-link" href="tel:${p}">${p}</a>`).join('')
+    : '<div class="field-value" style="color:var(--text-dim)">Not available</div>';
+  stEl.innerHTML = `
+    <div class="field-group">
+      <div class="field-label">Owner</div>
+      <div class="field-value" style="font-size:15px;font-family:var(--font-head)">${st.owner}</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Phone Numbers</div>
+      ${phonesHtml}
+    </div>
+    <div class="field-group">
+      <div class="field-label">Email</div>
+      <div class="field-value">${st.email || '<span style="color:var(--text-dim)">Not found</span>'}</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Mailing Address</div>
+      <div class="field-value">${st.mailing || '<span style="color:var(--text-dim)">Unknown</span>'}</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Relatives / Associates</div>
+      <div class="field-value">${st.relatives.join(', ') || '<span style="color:var(--text-dim)">None found</span>'}</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Notes</div>
+      <div class="field-value" style="font-size:12px;line-height:1.6;color:var(--text-muted)">${st.notes}</div>
+    </div>
+    <div class="divider"></div>
+    <div class="field-label" style="margin-bottom:8px">Lookup Links</div>
+    <div class="lookup-buttons">
+      <a class="lookup-btn" href="https://www.truepeoplesearch.com" target="_blank">🔍 TruePeopleSearch</a>
+      <a class="lookup-btn" href="https://www.spokeo.com" target="_blank">🔍 Spokeo</a>
+      <a class="lookup-btn" href="https://www.fastpeoplesearch.com" target="_blank">🔍 FastPeopleSearch</a>
+      <a class="lookup-btn" href="https://www.whitepages.com" target="_blank">🔍 WhitePages</a>
+    </div>
+  `;
+
+  // Comps
+  const comp = lead.comps;
+  const compEl = document.getElementById('compsContent');
+  const confClass = comp.confidence === 'HIGH' ? 'confidence-high' : 'confidence-badge';
+  const tableRows = comp.sales.length
+    ? comp.sales.map(s => `
+      <tr>
+        <td>${s.address}</td>
+        <td class="gold">${s.price}</td>
+        <td class="mono">${s.date}</td>
+        <td class="mono">${s.bed}</td>
+        <td class="mono">${s.sqft}</td>
+      </tr>
+    `).join('')
+    : `<tr><td colspan="5" style="color:var(--text-dim);padding:16px 4px;font-size:11px;font-family:var(--font-mono)">— Comps not yet pulled —</td></tr>`;
+
+  compEl.innerHTML = `
+    <div class="arv-display">
+      <div class="arv-label">After Repair Value (ARV)</div>
+      <div class="arv-value">${comp.arv}</div>
+      <div class="confidence-badge confidence-high">${comp.confidence} CONFIDENCE</div>
+    </div>
+    <div class="field-label" style="margin-bottom:8px">Comparable Sales</div>
+    <table class="comps-table">
+      <thead>
+        <tr>
+          <th>Address</th>
+          <th>Price</th>
+          <th>Date</th>
+          <th>Bed/Ba</th>
+          <th>SqFt</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+  `;
+
+  // CRM
+  const crm = lead.crm;
+  document.getElementById('followUpDate').textContent = crm.followUp;
+
+  const sel = document.getElementById('stageSelector');
+  sel.innerHTML = STAGE_FULL.map(s => `
+    <button class="stage-btn ${crm.stage === s ? 'active' : ''}" onclick="selectStage(this,'${s}')">${STAGE_LABELS[s] || s.charAt(0).toUpperCase()+s.slice(1)}</button>
+  `).join('');
+
+  const tl = document.getElementById('activityTimeline');
+  tl.innerHTML = crm.timeline.map(item => `
+    <div class="timeline-item">
+      <div class="timeline-icon">${item.icon}</div>
+      <div class="timeline-line"></div>
+      <div class="timeline-body">
+        <div class="timeline-action">${item.action}</div>
+        <div class="timeline-meta">${item.meta}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('noteInput').value = '';
+  const nb = document.getElementById('addNoteBtn');
+  nb.className = 'add-note-btn';
+  nb.textContent = '+ Add Note';
+
+  // Offer
+  const off = lead.offer;
+  const offerEl = document.getElementById('offerContent');
+  const arv = off.arv || 0;
+  const rep = off.repairs || 0;
+  const fee = off.fee || 0;
+  const hold = off.holding || 0;
+  const max = Math.max(0, Math.round(arv * 0.70 - rep - fee - hold));
+  offerEl.innerHTML = `
+    <div class="offer-field">
+      <span class="offer-field-label">ARV (After Repair Value)</span>
+      <input class="offer-field-input" type="text" value="$${arv.toLocaleString()}" id="offerArv">
+    </div>
+    <div class="offer-field">
+      <span class="offer-field-label">Estimated Repairs</span>
+      <input class="offer-field-input" type="text" value="$${rep.toLocaleString()}" id="offerRepairs">
+    </div>
+    <div class="offer-field">
+      <span class="offer-field-label">Wholesale Fee</span>
+      <input class="offer-field-input" type="text" value="$${fee.toLocaleString()}" id="offerFee">
+    </div>
+    <div class="offer-field">
+      <span class="offer-field-label">Holding Costs</span>
+      <input class="offer-field-input" type="text" value="$${hold.toLocaleString()}" id="offerHold">
+    </div>
+    <div class="offer-divider"></div>
+    <div class="max-offer-block">
+      <div class="max-offer-label">Maximum Allowable Offer</div>
+      <div class="max-offer-value" id="maxOfferVal">${max > 0 ? '$'+max.toLocaleString() : '—'}</div>
+    </div>
+    <div class="offer-formula">
+      <div style="color:var(--text);margin-bottom:4px;font-size:10px">FORMULA</div>
+      (ARV × 70%) − Repairs − Wholesale Fee − Holding = MAX OFFER<br>
+      (${arv > 0 ? '$'+arv.toLocaleString()+' × 70%' : '?'}) − $${rep.toLocaleString()} − $${fee.toLocaleString()} − $${hold.toLocaleString()} = <span style="color:var(--gold)">${max > 0 ? '$'+max.toLocaleString() : '—'}</span>
+    </div>
+  `;
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  // Find the correct tab button
+  document.querySelectorAll('.panel-tab').forEach(b => {
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+name+"'")) {
+      b.classList.add('active');
+    }
+  });
+  // Animate panel score bar on info tab
+  if (name === 'info' && activeLead) {
+    setTimeout(() => {
+      const bar = document.getElementById('panelScoreBar');
+      if (bar) bar.style.width = activeLead.score + '%';
+    }, 100);
+  }
+}
+
+// ============================================================
+// STAGE SELECT
+// ============================================================
+function selectStage(btn, stage) {
+  document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ============================================================
+// ADD NOTE
+// ============================================================
+function addNote() {
+  const input = document.getElementById('noteInput');
+  const btn = document.getElementById('addNoteBtn');
+  if (!input.value.trim()) return;
+
+  // Flash success
+  btn.classList.add('success');
+  btn.textContent = '✓ Note Saved';
+  setTimeout(() => {
+    btn.classList.remove('success');
+    btn.textContent = '+ Add Note';
+    input.value = '';
+
+    // Inject into timeline
+    const tl = document.getElementById('activityTimeline');
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    item.innerHTML = `
+      <div class="timeline-icon">📝</div>
+      <div class="timeline-line"></div>
+      <div class="timeline-body">
+        <div class="timeline-action">Note added</div>
+        <div class="timeline-meta">Just now · Tom M.</div>
+      </div>
+    `;
+    tl.insertBefore(item, tl.lastElementChild?.nextSibling || tl.firstChild);
+  }, 1400);
+}
+
+// ============================================================
+// NAV LINKS
+// ============================================================
+document.querySelectorAll('.nav-link').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ============================================================
+// INIT
+// ============================================================
+buildKanban();
+animateBars();
+animateGauge();
+
+// Auto-open demo lead after short delay for wow factor
+setTimeout(() => openPanel(1), 800);
+</script>
+</body>
+</html>

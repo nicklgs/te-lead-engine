@@ -1,0 +1,3043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TE Home Buyers — Lead Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<style>
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+/* ── Tokens ── */
+:root {
+  --navy: #1B2A4A;
+  --navy-deep: #0F1B30;
+  --navy-mid: #253958;
+  --gold: #B8985A;
+  --gold-light: #D4B87A;
+  --cream: #FDFBF7;
+  --sand: #F4EFE7;
+  --sand-mid: #EAE3D8;
+  --border: #DDD6CB;
+  --border-light: #EDE7DF;
+  --red: #8B1A1A;
+  --red-bright: #C0392B;
+  --green: #2D7A4F;
+  --green-bright: #1A8C52;
+  --blue: #2563EB;
+  --orange: #C07028;
+  --text: #1B2A4A;
+  --text-mid: #4A5E7A;
+  --text-muted: #8A98AE;
+  --header-h: 56px;
+  --panel-w: 400px;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sand-mid); border-radius: 3px; }
+
+/* ── Header ── */
+.header {
+  height: var(--header-h);
+  background: var(--navy-deep);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 0;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--navy-mid);
+  z-index: 100;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  margin-right: 32px;
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.brand-sub {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.nav-link {
+  padding: 6px 14px;
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+}
+
+.nav-link:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+.nav-link.active { color: var(--gold); background: rgba(184,152,90,0.1); }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: livepulse 2s infinite;
+}
+
+@keyframes livepulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--navy-mid);
+  border: 1.5px solid var(--navy-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* ── Alert Bar ── */
+.alert-bar {
+  background: #FEF2F2;
+  border-bottom: 1px solid #FECACA;
+  padding: 9px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.alert-bar.hidden { display: none; }
+
+.alert-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red-bright);
+  flex-shrink: 0;
+  animation: livepulse 1.5s infinite;
+}
+
+.alert-text {
+  flex: 1;
+  font-size: 12px;
+  color: var(--red-bright);
+  font-weight: 500;
+}
+
+.alert-text strong { font-weight: 700; }
+.alert-text a { color: var(--red-bright); text-decoration: underline; cursor: pointer; }
+
+.alert-dismiss {
+  background: none;
+  border: none;
+  color: #F87171;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.alert-dismiss:hover { opacity: 1; }
+
+/* ── Body Layout ── */
+.body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Main Area ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Page Header ── */
+.page-header {
+  padding: 18px 24px 0;
+  flex-shrink: 0;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.page-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Stats Row ── */
+.stats-row {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.stat {
+  flex: 1;
+  background: var(--cream);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+}
+
+.stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.stat-total::before { background: var(--navy); }
+.stat-hot::before { background: var(--red-bright); }
+.stat-value::before { background: var(--gold); }
+.stat-score::before { background: var(--blue); }
+
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.stat-total .stat-num { color: var(--navy); }
+.stat-hot .stat-num { color: var(--red-bright); }
+.stat-value .stat-num { color: var(--gold); }
+.stat-score .stat-num { color: var(--blue); }
+
+.stat-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.stat-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+/* ── Kanban Toolbar ── */
+.kanban-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px 10px;
+  flex-shrink: 0;
+}
+
+.toolbar-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.filter-pill {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-mid);
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-pill:hover { border-color: var(--navy); color: var(--navy); }
+.filter-pill.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+/* ── Kanban ── */
+.kanban {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  padding: 0 24px 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-start;
+}
+
+.kanban-col {
+  width: 230px;
+  min-width: 230px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: 100%;
+}
+
+.col-header {
+  padding: 10px 12px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid transparent;
+  flex-shrink: 0;
+}
+
+.col-header.stage-new { border-color: #6366f1; }
+.col-header.stage-contacted { border-color: var(--blue); }
+.col-header.stage-appt { border-color: var(--orange); }
+.col-header.stage-offer { border-color: var(--gold); }
+.col-header.stage-contract { border-color: var(--green-bright); }
+.col-header.stage-closed { border-color: var(--green); }
+.col-header.stage-dead { border-color: var(--text-muted); }
+
+.col-name {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+
+.col-count {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.col-cards {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 80px;
+}
+
+/* ── Lead Card ── */
+.lead-card {
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 11px 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.lead-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px;
+  height: 100%;
+  border-radius: 6px 0 0 6px;
+}
+
+.lead-card.tier-hot::before { background: var(--red-bright); }
+.lead-card.tier-warm::before { background: var(--orange); }
+.lead-card.tier-cool::before { background: var(--blue); }
+.lead-card.tier-cold::before { background: var(--text-muted); }
+
+.lead-card:hover {
+  border-color: var(--border);
+  box-shadow: 0 2px 12px rgba(27,42,74,0.1);
+  transform: translateY(-1px);
+}
+
+.lead-card.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(184,152,90,0.2);
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.card-address {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.25;
+  flex: 1;
+}
+
+.card-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.score-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tier-hot .score-num { color: var(--red-bright); }
+.tier-warm .score-num { color: var(--orange); }
+.tier-cool .score-num { color: var(--blue); }
+.tier-cold .score-num { color: var(--text-muted); }
+
+.score-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.tier-hot .score-label { color: var(--red-bright); }
+.tier-warm .score-label { color: var(--orange); }
+.tier-cool .score-label { color: var(--blue); }
+.tier-cold .score-label { color: var(--text-muted); }
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 7px;
+}
+
+.tag {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  color: var(--text-mid);
+  background: var(--sand);
+  white-space: nowrap;
+}
+
+.tag-stacked {
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.card-score-bar {
+  height: 3px;
+  background: var(--sand-mid);
+  border-radius: 2px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.card-score-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.tier-hot .card-score-fill { background: var(--red-bright); }
+.tier-warm .card-score-fill { background: var(--orange); }
+.tier-cool .card-score-fill { background: var(--blue); }
+.tier-cold .card-score-fill { background: var(--text-muted); }
+
+.card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.card-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.card-indicators {
+  display: flex;
+  gap: 3px;
+}
+
+.indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.indicator.done { background: #DCFCE7; color: #166534; }
+.indicator.pending { background: var(--sand); color: var(--text-muted); }
+
+.overdue-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--red-bright);
+  background: #FEE2E2;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  animation: overduepulse 2s infinite;
+}
+
+@keyframes overduepulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ── Time Decay ── */
+/* Aging: 4-7 days — warm tint creeps in */
+.lead-card.decay-aging {
+  background: #FFFDF5;
+}
+
+/* Stale: 8-14 days — amber wash */
+.lead-card.decay-stale {
+  background: #FFFBEB;
+  border-color: #F6E3A8;
+}
+
+/* Cold: 15-21 days — orange amber, border shifts */
+.lead-card.decay-cold {
+  background: #FFF7E6;
+  border-color: #F0C060;
+}
+
+.lead-card.decay-cold::before {
+  background: #D97706 !important;
+}
+
+/* Dead: 22+ days — red tint, urgent */
+.lead-card.decay-dead {
+  background: #FFF5F5;
+  border-color: #FDCDC9;
+}
+
+.lead-card.decay-dead::before {
+  background: var(--red-bright) !important;
+  animation: decaypulse 2s ease-in-out infinite;
+}
+
+@keyframes decaypulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Decay badge */
+.decay-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.decay-badge.aging {
+  color: #92400E;
+  background: #FEF3C7;
+}
+
+.decay-badge.stale {
+  color: #78350F;
+  background: #FDE68A;
+  animation: overduepulse 3s infinite;
+}
+
+.decay-badge.cold {
+  color: #7C2D12;
+  background: #FED7AA;
+  animation: overduepulse 2.5s infinite;
+}
+
+.decay-badge.dead {
+  color: var(--red-bright);
+  background: #FEE2E2;
+  animation: overduepulse 1.8s infinite;
+}
+
+/* Decay tooltip bar at bottom of card */
+.decay-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 0 0 6px 6px;
+}
+
+.decay-aging .decay-bar { background: linear-gradient(90deg, #FCD34D, transparent); width: 25%; }
+.decay-stale .decay-bar { background: linear-gradient(90deg, #F59E0B, #FCD34D); width: 50%; }
+.decay-cold .decay-bar { background: linear-gradient(90deg, #F97316, #F59E0B); width: 75%; }
+.decay-dead .decay-bar { background: linear-gradient(90deg, var(--red-bright), #F97316); width: 100%; }
+
+/* ── Detail Panel ── */
+.detail-panel {
+  width: var(--panel-w);
+  min-width: var(--panel-w);
+  background: white;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 16px 20px 0;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.panel-stage-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.panel-address {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.panel-score-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.panel-score-big {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.panel-score-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.panel-tier {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.panel-score-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--sand-mid);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.panel-score-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.panel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-bottom: 14px;
+}
+
+/* ── Panel Tabs ── */
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+  background: var(--cream);
+}
+
+.panel-tab {
+  flex: 1;
+  padding: 10px 4px 9px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.panel-tab:hover { color: var(--navy); }
+.panel-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+
+/* ── Panel Content ── */
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px;
+}
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* Info table */
+.info-row {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.info-row:last-child { border-bottom: none; }
+
+.info-key {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  width: 100px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.info-val {
+  font-size: 13px;
+  color: var(--navy);
+  font-weight: 400;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.freshness-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.fresh { background: var(--green-bright); }
+.stale { background: var(--orange); }
+.old { background: var(--red-bright); }
+.none { background: var(--border); }
+
+/* Skip Trace */
+.skip-owner {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.contact-item:last-child { border-bottom: none; }
+
+.contact-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--sand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contact-icon svg { width: 14px; height: 14px; stroke: var(--text-mid); fill: none; stroke-width: 1.5; }
+
+.contact-detail { flex: 1; }
+.contact-label { font-size: 9px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.contact-value { font-size: 13px; color: var(--navy); font-weight: 500; }
+.contact-value a { color: var(--gold); text-decoration: none; font-weight: 600; }
+.contact-value a:hover { text-decoration: underline; }
+
+.lookup-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+}
+
+.lookup-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.lookup-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.lookup-link {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-mid);
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.lookup-link:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Comps */
+.arv-display {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.arv-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.arv-meta { display: flex; flex-direction: column; gap: 4px; padding-bottom: 4px; }
+.arv-label { font-size: 9px; font-weight: 700; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; }
+.confidence-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.confidence-high { background: #DCFCE7; color: #166534; }
+.confidence-medium { background: #FEF9C3; color: #854D0E; }
+.confidence-low { background: #FEE2E2; color: #991B1B; }
+
+.comps-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.comps-table th {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 0 8px 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.comps-table td {
+  padding: 9px 8px 9px 0;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--navy);
+  vertical-align: top;
+}
+
+.comps-table tr:last-child td { border-bottom: none; }
+
+.comp-price { font-weight: 600; color: var(--green); }
+
+/* CRM */
+.stage-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 16px;
+}
+
+.stage-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.stage-btn:hover { border-color: var(--navy); color: var(--navy); }
+.stage-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+.followup-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 16px;
+}
+
+.followup-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.followup-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  flex: 1;
+}
+
+.followup-date.overdue { color: var(--red-bright); }
+
+.activity-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.activity-list { display: flex; flex-direction: column; gap: 0; }
+
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
+}
+
+.activity-item:last-child { border-bottom: none; }
+
+.activity-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--sand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activity-icon svg { width: 12px; height: 12px; stroke: var(--text-mid); fill: none; stroke-width: 1.5; }
+
+.activity-content { flex: 1; }
+.activity-text { font-size: 12px; color: var(--navy); line-height: 1.4; }
+.activity-date { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+.add-note-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+}
+
+.add-note-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  color: var(--navy);
+  background: white;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.add-note-input:focus { border-color: var(--gold); }
+.add-note-input::placeholder { color: var(--text-muted); }
+
+.add-note-btn {
+  padding: 8px 14px;
+  background: var(--navy);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.add-note-btn:hover { background: var(--navy-deep); }
+.add-note-btn.success { background: var(--green-bright); }
+
+/* Offer */
+.offer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.offer-field label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.offer-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  background: white;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.offer-input:focus { border-color: var(--gold); }
+
+.offer-result {
+  background: var(--navy-deep);
+  border-radius: 8px;
+  padding: 18px 20px;
+  text-align: center;
+}
+
+.offer-result-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 8px;
+}
+
+.offer-result-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 46px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.offer-formula {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  font-style: italic;
+}
+
+.offer-breakdown {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--text-mid);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.breakdown-row:last-child { border-bottom: none; }
+.breakdown-key { color: var(--text-muted); }
+.breakdown-val { font-weight: 600; color: var(--navy); }
+
+/* ── Empty Panel ── */
+.panel-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  padding: 40px 20px;
+}
+
+.panel-empty svg { width: 32px; height: 32px; stroke: var(--border); fill: none; stroke-width: 1.5; }
+.panel-empty p { font-size: 12px; text-align: center; max-width: 160px; line-height: 1.5; }
+
+/* ── No cards empty state ── */
+.col-empty {
+  padding: 20px 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: var(--cream);
+}
+
+/* ── Score Breakdown Tooltip ── */
+.score-wrap {
+  position: relative;
+  cursor: help;
+  flex-shrink: 0;
+}
+
+.score-tooltip {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: -4px;
+  background: var(--navy-deep);
+  border-radius: 6px;
+  padding: 10px 12px;
+  min-width: 196px;
+  z-index: 500;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.18s, transform 0.18s;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+}
+
+.score-wrap:hover .score-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.score-tooltip::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: 14px;
+  width: 7px;
+  height: 7px;
+  background: var(--navy-deep);
+  transform: rotate(45deg);
+}
+
+.tt-title {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 7px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.tt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  gap: 10px;
+}
+
+.tt-cat { flex: 1; white-space: nowrap; }
+
+.tt-pts {
+  font-weight: 700;
+  color: var(--gold-light);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.tt-pts.zero { color: rgba(255,255,255,0.2); font-weight: 400; }
+
+.tt-total {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+}
+
+/* Panel score tooltip */
+#panelScoreBig {
+  position: relative;
+  cursor: help;
+  display: inline-block;
+}
+
+.panel-score-tooltip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: var(--navy-deep);
+  border-radius: 6px;
+  padding: 11px 13px;
+  min-width: 210px;
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.18s, transform 0.18s;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+  white-space: nowrap;
+}
+
+#panelScoreBig:hover .panel-score-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* ── Quick Action Buttons ── */
+.card-quick-actions {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  background: rgba(12,22,42,0.94);
+  border-radius: 0 0 5px 5px;
+  overflow: hidden;
+  z-index: 20;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.lead-card:hover .card-quick-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.quick-btn {
+  flex: 1;
+  padding: 6px 2px 7px;
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  background: none;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  letter-spacing: 0.03em;
+  transition: background 0.1s, color 0.1s;
+  font-family: 'Outfit', sans-serif;
+}
+
+.quick-btn:last-child { border-right: none; }
+.quick-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+.quick-btn .qicon { font-size: 12px; line-height: 1; }
+
+/* ── Zip Heat Map ── */
+.heatmap-panel {
+  padding: 0 24px 10px;
+  flex-shrink: 0;
+  display: none;
+}
+
+.heatmap-panel.open { display: block; }
+
+.heatmap-inner {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px 14px;
+}
+
+.heatmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.heatmap-title-text {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.heatmap-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.legend-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+}
+
+.heatmap-hint {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.heatmap-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.zip-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 42px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  border: 1.5px solid transparent;
+  padding: 2px;
+}
+
+.zip-cell:hover { transform: scale(1.07); box-shadow: 0 3px 10px rgba(0,0,0,0.13); }
+
+.zip-cell.zip-active {
+  box-shadow: 0 0 0 2.5px var(--navy), 0 3px 10px rgba(27,42,74,0.25) !important;
+}
+
+.zip-code-text {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+}
+
+.zip-name-text {
+  font-size: 7px;
+  font-weight: 400;
+  opacity: 0.7;
+  line-height: 1.2;
+}
+
+.zip-count-text {
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.zip-d0 { background: var(--cream); border-color: var(--border-light); }
+.zip-d0 .zip-code-text { color: var(--text-muted); }
+.zip-d0 .zip-name-text { color: var(--text-muted); }
+
+.zip-d1 { background: #FEF9C3; border-color: #FDE68A; }
+.zip-d1 .zip-code-text { color: #92400E; }
+.zip-d1 .zip-name-text { color: #92400E; }
+.zip-d1 .zip-count-text { color: #B45309; }
+
+.zip-d2 { background: #FDE68A; border-color: #F59E0B; }
+.zip-d2 .zip-code-text { color: #78350F; }
+.zip-d2 .zip-name-text { color: #78350F; }
+.zip-d2 .zip-count-text { color: #92400E; }
+
+.zip-d3 { background: var(--navy); border-color: var(--navy-mid); }
+.zip-d3 .zip-code-text { color: white; }
+.zip-d3 .zip-name-text { color: rgba(255,255,255,0.65); }
+.zip-d3 .zip-count-text { color: var(--gold-light); }
+
+/* ── Map Modal ── */
+.map-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: none;
+  flex-direction: column;
+  background: var(--cream);
+}
+
+.map-modal.open { display: flex; }
+
+.map-modal-header {
+  height: 52px;
+  background: var(--navy-deep);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--navy-mid);
+}
+
+.map-modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.02em;
+  flex: 1;
+}
+
+.map-modal-title span {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-left: 10px;
+}
+
+.map-modal-stats {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.map-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+}
+
+.map-stat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.map-stat strong { color: white; font-weight: 600; }
+
+.map-close-btn {
+  padding: 7px 16px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  background: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.map-close-btn:hover { background: rgba(255,255,255,0.08); color: white; border-color: rgba(255,255,255,0.4); }
+
+.map-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+#leafletMap {
+  flex: 1;
+}
+
+.map-sidebar {
+  width: 280px;
+  background: white;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.map-sidebar-header {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.map-sidebar-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.map-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-mid);
+}
+
+.map-legend-circle {
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid;
+}
+
+.map-zip-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 0;
+}
+
+.map-zip-item {
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.map-zip-item:hover { background: var(--cream); }
+.map-zip-item:last-child { border-bottom: none; }
+
+.map-zip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.map-zip-info { flex: 1; }
+.map-zip-code { font-size: 12px; font-weight: 700; color: var(--navy); }
+.map-zip-name { font-size: 10px; color: var(--text-muted); }
+
+.map-zip-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-mid);
+}
+
+.map-zip-count.has-leads { color: var(--navy); }
+
+.map-zip-filter-btn {
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: white;
+  color: var(--text-mid);
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.map-zip-filter-btn:hover { background: var(--navy); color: white; border-color: var(--navy); }
+
+/* Leaflet popup customization */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  padding: 0 !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.2) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.leaflet-popup-tip { background: white !important; }
+
+.map-popup {
+  padding: 14px 16px;
+  min-width: 200px;
+}
+
+.map-popup-zip {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.map-popup-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.map-popup-count {
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.map-popup-lead {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 11px;
+}
+
+.map-popup-lead:last-of-type { border-bottom: none; }
+
+.map-popup-tier {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.map-popup-addr { flex: 1; color: var(--navy); font-weight: 500; }
+.map-popup-score { color: var(--text-muted); font-size: 10px; }
+
+.map-popup-btn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  background: var(--navy);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.map-popup-btn:hover { background: var(--navy-deep); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <a class="brand" href="#">
+    <div class="brand-mark">TE</div>
+    <div class="brand-text">
+      <span class="brand-name">TE Home Buyers</span>
+      <span class="brand-sub">Lead Engine</span>
+    </div>
+  </a>
+  <nav class="nav">
+    <button class="nav-link active">Dashboard</button>
+    <button class="nav-link">Leads</button>
+    <button class="nav-link">Scrub</button>
+    <button class="nav-link">Buyers</button>
+    <button class="nav-link">Add Lead</button>
+    <button class="nav-link" onclick="openMapView()" style="color:var(--gold);border:1px solid rgba(184,152,90,0.3);margin-left:8px;">🗺 Map View</button>
+  </nav>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      8 leads
+    </div>
+    <div class="avatar">TM</div>
+  </div>
+</header>
+
+<!-- Alert Bar -->
+<div class="alert-bar" id="alertBar">
+  <div class="alert-dot"></div>
+  <div class="alert-text">
+    <strong>1 follow-up overdue</strong> —
+    <a onclick="selectLead('lead6')">120 Lansdowne Ave, Lansdowne PA</a>
+    · Expired Listing · Due Apr 1, 2026
+  </div>
+  <button class="alert-dismiss" onclick="document.getElementById('alertBar').classList.add('hidden')">×</button>
+</div>
+
+<!-- Body -->
+<div class="body">
+  <div class="main">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title-row">
+        <h1 class="page-title">Pipeline Overview</h1>
+        <span class="page-date">April 2, 2026</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat stat-total">
+          <div class="stat-num">8</div>
+          <div class="stat-label">Total Leads</div>
+          <div class="stat-sub">+2 this week</div>
+        </div>
+        <div class="stat stat-hot">
+          <div class="stat-num">2</div>
+          <div class="stat-label">Hot Leads</div>
+          <div class="stat-sub">Score 75+</div>
+        </div>
+        <div class="stat stat-value">
+          <div class="stat-num">$166K</div>
+          <div class="stat-label">Pipeline Value</div>
+          <div class="stat-sub">Est. ARV total</div>
+        </div>
+        <div class="stat stat-score">
+          <div class="stat-num">46</div>
+          <div class="stat-label">Avg Score</div>
+          <div class="stat-sub">Across pipeline</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kanban Toolbar -->
+    <div class="kanban-toolbar">
+      <span class="toolbar-label">Filter</span>
+      <button class="filter-pill active" onclick="filterKanban('all', this)">All</button>
+      <button class="filter-pill" onclick="filterKanban('hot', this)">Hot</button>
+      <button class="filter-pill" onclick="filterKanban('warm', this)">Warm</button>
+      <button class="filter-pill" onclick="filterKanban('tx', this)">Tax Delinquent</button>
+      <button class="filter-pill" onclick="filterKanban('fc', this)">Pre-Foreclosure</button>
+      <button class="filter-pill" onclick="filterKanban('pb', this)">Probate</button>
+      <button class="filter-pill" id="heatmapBtn" onclick="toggleHeatmap(this)" style="margin-left:auto;">📍 Zip Map</button>
+    </div>
+
+    <!-- Zip Heat Map -->
+    <div class="heatmap-panel" id="heatmapPanel">
+      <div class="heatmap-inner">
+        <div class="heatmap-header">
+          <span class="heatmap-title-text">Delaware County · Lead Density by Zip</span>
+          <div class="heatmap-legend">
+            <div class="heatmap-legend-item"><div class="legend-swatch" style="background:var(--cream);border:1px solid var(--border)"></div><span>None</span></div>
+            <div class="heatmap-legend-item"><div class="legend-swatch" style="background:#FEF9C3;border:1px solid #FDE68A"></div><span>1 lead</span></div>
+            <div class="heatmap-legend-item"><div class="legend-swatch" style="background:#FDE68A;border:1px solid #F59E0B"></div><span>2 leads</span></div>
+            <div class="heatmap-legend-item"><div class="legend-swatch" style="background:var(--navy)"></div><span>3+</span></div>
+            <span class="heatmap-hint">· Click zip to filter pipeline</span>
+          </div>
+        </div>
+        <div class="heatmap-grid" id="heatmapGrid"></div>
+      </div>
+    </div>
+
+    <!-- Kanban -->
+    <div class="kanban" id="kanban">
+
+      <!-- NEW -->
+      <div class="kanban-col" data-stage="new">
+        <div class="col-header stage-new">
+          <span class="col-name">New</span>
+          <span class="col-count" id="count-new">4</span>
+        </div>
+        <div class="col-cards" id="col-new"></div>
+      </div>
+
+      <!-- CONTACTED -->
+      <div class="kanban-col" data-stage="contacted">
+        <div class="col-header stage-contacted">
+          <span class="col-name">Contacted</span>
+          <span class="col-count" id="count-contacted">2</span>
+        </div>
+        <div class="col-cards" id="col-contacted"></div>
+      </div>
+
+      <!-- APPOINTMENT -->
+      <div class="kanban-col" data-stage="appt">
+        <div class="col-header stage-appt">
+          <span class="col-name">Appointment</span>
+          <span class="col-count" id="count-appt">1</span>
+        </div>
+        <div class="col-cards" id="col-appt"></div>
+      </div>
+
+      <!-- OFFER MADE -->
+      <div class="kanban-col" data-stage="offer">
+        <div class="col-header stage-offer">
+          <span class="col-name">Offer Made</span>
+          <span class="col-count" id="count-offer">1</span>
+        </div>
+        <div class="col-cards" id="col-offer"></div>
+      </div>
+
+      <!-- UNDER CONTRACT -->
+      <div class="kanban-col" data-stage="contract">
+        <div class="col-header stage-contract">
+          <span class="col-name">Under Contract</span>
+          <span class="col-count" id="count-contract">0</span>
+        </div>
+        <div class="col-cards" id="col-contract"></div>
+      </div>
+
+      <!-- CLOSED -->
+      <div class="kanban-col" data-stage="closed">
+        <div class="col-header stage-closed">
+          <span class="col-name">Closed</span>
+          <span class="col-count" id="count-closed">0</span>
+        </div>
+        <div class="col-cards" id="col-closed"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Detail Panel -->
+  <aside class="detail-panel" id="detailPanel">
+    <div id="panelEmpty" class="panel-empty">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      <p>Select a lead to view details</p>
+    </div>
+    <div id="panelFull" style="display:none; flex-direction:column; height:100%; overflow:hidden; display:none;">
+      <div class="panel-header">
+        <div id="panelStageBadge" class="panel-stage-badge"></div>
+        <div id="panelAddress" class="panel-address"></div>
+        <div class="panel-score-row">
+          <div id="panelScoreBig" class="panel-score-big"></div>
+          <div class="panel-score-meta">
+            <div id="panelTier" class="panel-tier"></div>
+            <div id="panelScoreBarWrap" class="panel-score-bar" style="width:80px;">
+              <div id="panelScoreFill" class="panel-score-fill" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+        <div id="panelTags" class="panel-tags"></div>
+      </div>
+
+      <div class="panel-tabs">
+        <button class="panel-tab active" onclick="switchTab('info', this)">Info</button>
+        <button class="panel-tab" onclick="switchTab('skip', this)">Skip Trace</button>
+        <button class="panel-tab" onclick="switchTab('comps', this)">Comps</button>
+        <button class="panel-tab" onclick="switchTab('crm', this)">CRM</button>
+        <button class="panel-tab" onclick="switchTab('offer', this)">Offer</button>
+      </div>
+
+      <div class="panel-content">
+        <!-- INFO -->
+        <div class="tab-pane active" id="tab-info">
+          <div id="infoContent"></div>
+        </div>
+
+        <!-- SKIP TRACE -->
+        <div class="tab-pane" id="tab-skip">
+          <div id="skipContent"></div>
+        </div>
+
+        <!-- COMPS -->
+        <div class="tab-pane" id="tab-comps">
+          <div id="compsContent"></div>
+        </div>
+
+        <!-- CRM -->
+        <div class="tab-pane" id="tab-crm">
+          <div id="crmContent"></div>
+        </div>
+
+        <!-- OFFER -->
+        <div class="tab-pane" id="tab-offer">
+          <div id="offerContent"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Map Modal -->
+<div class="map-modal" id="mapModal">
+  <div class="map-modal-header">
+    <div class="map-modal-title">Pipeline Map <span>Delaware County, PA</span></div>
+    <div class="map-modal-stats">
+      <div class="map-stat">
+        <div class="map-stat-dot" style="background:#1B2A4A"></div>
+        <span>3+ leads</span>
+      </div>
+      <div class="map-stat">
+        <div class="map-stat-dot" style="background:#D97706"></div>
+        <span>2 leads</span>
+      </div>
+      <div class="map-stat">
+        <div class="map-stat-dot" style="background:#B8985A"></div>
+        <span>1 lead</span>
+      </div>
+      <div class="map-stat">
+        <div class="map-stat-dot" style="background:#CBD5E1;border:1px solid #94A3B8"></div>
+        <span>No leads</span>
+      </div>
+    </div>
+    <button class="map-close-btn" onclick="closeMapView()">✕ Close Map</button>
+  </div>
+  <div class="map-body">
+    <div id="leafletMap"></div>
+    <div class="map-sidebar">
+      <div class="map-sidebar-header">
+        <div class="map-sidebar-title">Zip Code Breakdown</div>
+        <div class="map-legend">
+          <div class="map-legend-item">
+            <div class="map-legend-circle" style="width:14px;height:14px;background:rgba(27,42,74,0.7);border-color:#1B2A4A"></div>
+            <span>3+ leads — Tier 1 priority</span>
+          </div>
+          <div class="map-legend-item">
+            <div class="map-legend-circle" style="width:12px;height:12px;background:rgba(217,119,6,0.55);border-color:#D97706"></div>
+            <span>2 leads — Active zone</span>
+          </div>
+          <div class="map-legend-item">
+            <div class="map-legend-circle" style="width:10px;height:10px;background:rgba(184,152,90,0.5);border-color:#B8985A"></div>
+            <span>1 lead — Watch zone</span>
+          </div>
+          <div class="map-legend-item">
+            <div class="map-legend-circle" style="width:8px;height:8px;background:rgba(203,213,225,0.4);border-color:#94A3B8"></div>
+            <span>No leads — Untapped</span>
+          </div>
+        </div>
+      </div>
+      <div class="map-zip-list" id="mapZipList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Lead Data ──
+const LEADS = [
+  {
+    id: 'lead1',
+    address: '412 W 3rd St',
+    location: 'Chester, PA 19013',
+    zip: '19013',
+    stage: 'contacted',
+    score: 73,
+    tier: 'warm',
+    categories: ['🏚️ Pre-Foreclosure', '💰 Tax Delinquent'],
+    categoryIds: ['fc','tx'],
+    stackCount: 2,
+    followUp: '2026-04-04',
+    followUpDisplay: 'Apr 4, 2026',
+    overdue: false,
+    details: 'Lis pendens filed Jan 2026. Mortgage default — behind on payments 6 months. Single family, 3bd/1ba, 1,100 sqft. Built 1952.',
+    source: 'Scrub · Public Records',
+    skipTrace: {
+      owner: 'James Wilson',
+      phones: ['(484) 555-0142', '(610) 555-0398'],
+      email: 'james.wilson@gmail.com',
+      mailing: '412 W 3rd St, Chester, PA 19013',
+      relatives: 'Patricia Wilson, Michael Wilson',
+      notes: 'Owner-occupied. Owner since 2008.',
+    },
+    comps: {
+      arv: '$95,000',
+      confidence: 'high',
+      list: [
+        { address: '430 W 3rd St, Chester', price: '$92,000', date: '11/15/2025', beds: '3bd/1ba', sqft: '1,050' },
+        { address: '505 Morton Ave, Chester', price: '$98,000', date: '01/08/2026', beds: '3bd/1ba', sqft: '1,150' },
+        { address: '618 Kerlin St, Chester', price: '$88,000', date: '12/02/2025', beds: '2bd/1ba', sqft: '980' },
+      ]
+    },
+    offer: { arv: 95000, repairs: 15000, fee: 8000, holding: 3000 },
+    activities: [
+      { type: 'note', text: 'Lead discovered via Pre-Foreclosure scrub', date: '10d ago' },
+      { type: 'search', text: 'Skip trace completed — owner James Wilson, 2 phones found', date: '8d ago' },
+      { type: 'chart', text: 'Comps pulled — ARV est. $95,000 (high confidence)', date: '7d ago' },
+      { type: 'arrow', text: 'Stage changed: New → Contacted', date: '5d ago' },
+      { type: 'phone', text: 'Called owner — interested but needs to think. Follow up Friday.', date: '5d ago' },
+      { type: 'dollar', text: 'Max offer calculated: $40,500', date: '4d ago' },
+    ],
+    lastActivityDays: 4,
+    hasSkip: true, hasComps: true, hasOffer: true,
+  },
+  {
+    id: 'lead2',
+    address: '1025 Morton Ave',
+    location: 'Chester, PA 19013',
+    zip: '19013',
+    stage: 'new',
+    score: 67,
+    tier: 'warm',
+    categories: ['💰 Tax Delinquent', '🏗️ Vacant'],
+    categoryIds: ['tx','vc'],
+    stackCount: 2,
+    followUp: null,
+    followUpDisplay: 'Not set',
+    overdue: false,
+    details: 'Delinquent property taxes since 2023, $6,800 owed. Upset sale scheduled. Single family, vacant. Owner lives out of state.',
+    source: 'Scrub · Tax Records',
+    skipTrace: null,
+    comps: null,
+    offer: null,
+    activities: [
+      { type: 'note', text: 'Lead discovered via Tax Delinquent scrub', date: '5d ago' },
+    ],
+    lastActivityDays: 5,
+    hasSkip: false, hasComps: false, hasOffer: false,
+  },
+  {
+    id: 'lead3',
+    address: '227 Pine St',
+    location: 'Darby, PA 19023',
+    zip: '19023',
+    stage: 'appt',
+    score: 33,
+    tier: 'cool',
+    categories: ['📜 Probate/Estate'],
+    categoryIds: ['pb'],
+    stackCount: 1,
+    followUp: '2026-04-03',
+    followUpDisplay: 'Apr 3, 2026',
+    overdue: false,
+    details: 'Inherited property, probate filed Sept 2025. Estate of Margaret Thompson. Heirs live in NJ. 3bd/1.5ba, 1,300 sqft.',
+    source: 'Scrub · Orphans Court',
+    skipTrace: {
+      owner: 'Estate of Margaret Thompson',
+      phones: ['(856) 555-0271'],
+      email: 'r.thompson.nj@yahoo.com',
+      mailing: '45 Elm Dr, Cherry Hill, NJ 08003',
+      relatives: 'Robert Thompson (son), Linda Davis (daughter)',
+      notes: 'Absentee heirs in NJ. Property unoccupied since Aug 2025.',
+    },
+    comps: {
+      arv: '$125,000',
+      confidence: 'medium',
+      list: [
+        { address: '310 Pine St, Darby', price: '$118,000', date: '10/20/2025', beds: '3bd/1ba', sqft: '1,200' },
+        { address: '145 Chester Pike, Darby', price: '$132,000', date: '01/15/2026', beds: '3bd/2ba', sqft: '1,400' },
+        { address: '401 Main St, Darby', price: '$121,000', date: '11/30/2025', beds: '3bd/1ba', sqft: '1,250' },
+      ]
+    },
+    offer: null,
+    activities: [
+      { type: 'note', text: 'Lead discovered via Probate scrub', date: '12d ago' },
+      { type: 'search', text: 'Skip trace — heir Robert Thompson in NJ', date: '8d ago' },
+      { type: 'arrow', text: 'Stage changed: New → Contacted', date: '6d ago' },
+      { type: 'chart', text: 'Comps pulled — ARV est. $125,000 (medium confidence)', date: '6d ago' },
+      { type: 'phone', text: 'Spoke with Robert — scheduling walkthrough', date: '4d ago' },
+      { type: 'arrow', text: 'Stage changed: Contacted → Appointment', date: '3d ago' },
+    ],
+    lastActivityDays: 3,
+    hasSkip: true, hasComps: true, hasOffer: false,
+  },
+  {
+    id: 'lead4',
+    address: '6820 Market St',
+    location: 'Upper Darby, PA 19082',
+    zip: '19082',
+    stage: 'new',
+    score: 53,
+    tier: 'warm',
+    categories: ['⚠️ Code Violations', '🏗️ Vacant'],
+    categoryIds: ['cv','vc'],
+    stackCount: 2,
+    followUp: null,
+    followUpDisplay: 'Not set',
+    overdue: false,
+    details: 'Multiple code violations — condemned, boarded windows, failed electrical. Vacant 2+ years. Multi-family duplex.',
+    source: 'Scrub · Code Enforcement',
+    skipTrace: null, comps: null, offer: null,
+    activities: [{ type: 'note', text: 'Lead discovered via Code Violations scrub', date: '2d ago' }],
+    lastActivityDays: 2,
+    hasSkip: false, hasComps: false, hasOffer: false,
+  },
+  {
+    id: 'lead5',
+    address: '740 Burmont Rd',
+    location: 'Drexel Hill, PA 19026',
+    zip: '19026',
+    stage: 'offer',
+    score: 78,
+    tier: 'hot',
+    categories: ['⚖️ Divorce'],
+    categoryIds: ['dv'],
+    stackCount: 1,
+    followUp: '2026-04-05',
+    followUpDisplay: 'Apr 5, 2026',
+    overdue: false,
+    details: 'Divorce filing — court-ordered property sale. Single family, 4bd/2ba, 1,800 sqft. Both parties motivated.',
+    source: 'Scrub · Divorce Court',
+    skipTrace: {
+      owner: 'David & Susan Garcia',
+      phones: ['(484) 555-0183', '(484) 555-0294'],
+      email: 'david.garcia@outlook.com',
+      mailing: '740 Burmont Rd, Drexel Hill, PA 19026',
+      relatives: 'Susan Garcia (co-owner)',
+      notes: 'Both owners cooperative. Attorney involved.',
+    },
+    comps: {
+      arv: '$215,000',
+      confidence: 'high',
+      list: [
+        { address: '810 Burmont Rd, Drexel Hill', price: '$220,000', date: '12/10/2025', beds: '4bd/2ba', sqft: '1,750' },
+        { address: '215 Shadeland Ave, Drexel Hill', price: '$208,000', date: '02/01/2026', beds: '3bd/2ba', sqft: '1,650' },
+        { address: '432 State Rd, Drexel Hill', price: '$225,000', date: '11/20/2025', beds: '4bd/2.5ba', sqft: '1,900' },
+      ]
+    },
+    offer: { arv: 215000, repairs: 10000, fee: 10000, holding: 5000 },
+    activities: [
+      { type: 'note', text: 'Lead discovered via Divorce scrub', date: '20d ago' },
+      { type: 'search', text: 'Skip trace — both owners found', date: '15d ago' },
+      { type: 'chart', text: 'Comps pulled — ARV $215,000 (high confidence)', date: '14d ago' },
+      { type: 'arrow', text: 'Stage: New → Contacted', date: '12d ago' },
+      { type: 'phone', text: 'Called David — attorney reviewing', date: '12d ago' },
+      { type: 'note', text: 'Walkthrough completed. Minor cosmetic repairs.', date: '6d ago' },
+      { type: 'dollar', text: 'Offer submitted: $125,500', date: '4d ago' },
+      { type: 'arrow', text: 'Stage: Appointment → Offer Made', date: '4d ago' },
+    ],
+    lastActivityDays: 4,
+    hasSkip: true, hasComps: true, hasOffer: true,
+  },
+  {
+    id: 'lead6',
+    address: '120 Lansdowne Ave',
+    location: 'Lansdowne, PA 19050',
+    zip: '19050',
+    stage: 'contacted',
+    score: 32,
+    tier: 'cool',
+    categories: ['📋 Expired Listing'],
+    categoryIds: ['ex'],
+    stackCount: 1,
+    followUp: '2026-04-01',
+    followUpDisplay: 'Apr 1, 2026',
+    overdue: true,
+    details: 'Expired MLS listing, 200 days on market, three price reductions. Originally listed at $165K, last price $139K.',
+    source: 'Scrub · MLS',
+    skipTrace: {
+      owner: 'Linda Thompson',
+      phones: ['(610) 555-0456'],
+      email: null,
+      mailing: '120 Lansdowne Ave, Lansdowne, PA 19050',
+      relatives: 'Michael Thompson',
+      notes: 'Owner-occupied, frustrated with market.',
+    },
+    comps: null,
+    offer: null,
+    activities: [
+      { type: 'note', text: 'Lead discovered via Expired Listing scrub', date: '7d ago' },
+      { type: 'search', text: 'Skip trace — owner Linda Thompson', date: '5d ago' },
+      { type: 'arrow', text: 'Stage: New → Contacted', date: '3d ago' },
+      { type: 'phone', text: 'Left voicemail. Will call back.', date: '3d ago' },
+    ],
+    lastActivityDays: 9,
+    hasSkip: true, hasComps: false, hasOffer: false,
+  },
+  {
+    id: 'lead7',
+    address: '301 Long Ln',
+    location: 'Upper Darby, PA 19082',
+    zip: '19082',
+    stage: 'new',
+    score: 28,
+    tier: 'cool',
+    categories: ['🏷️ FSBO'],
+    categoryIds: ['fs'],
+    stackCount: 1,
+    followUp: null,
+    followUpDisplay: 'Not set',
+    overdue: false,
+    details: 'For sale by owner, 60 days on market. Single family 2bd/1ba, needs work. Owner relocating for job.',
+    source: 'Manual · Driving for Dollars',
+    skipTrace: null, comps: null, offer: null,
+    activities: [{ type: 'note', text: 'Spotted driving for dollars — FSBO sign in yard', date: '1d ago' }],
+    lastActivityDays: 17,
+    hasSkip: false, hasComps: false, hasOffer: false,
+  },
+  {
+    id: 'lead8',
+    address: '534 Oak Ln',
+    location: 'Darby, PA 19023',
+    zip: '19023',
+    stage: 'new',
+    score: 40,
+    tier: 'cool',
+    categories: ['🏗️ Vacant', '💰 Tax Delinquent'],
+    categoryIds: ['vc','tx'],
+    stackCount: 2,
+    followUp: null,
+    followUpDisplay: 'Not set',
+    overdue: false,
+    details: 'Vacant and abandoned. Boarded up, overgrown yard. Empty 3+ years. Possible tax lien.',
+    source: 'Manual · Driving for Dollars',
+    skipTrace: null, comps: null, offer: null,
+    activities: [{ type: 'note', text: 'Found driving for dollars — vacant, boarded, overgrown', date: 'today' }],
+    lastActivityDays: 26,
+    hasSkip: false, hasComps: false, hasOffer: false,
+  },
+];
+
+// ── Score Breakdowns ──
+const SCORE_BREAKDOWNS = {
+  lead1: { distress: 25, property: 18, equity: 12, quality: 13, stacking: 5 },
+  lead2: { distress: 22, property: 15, equity: 18, quality: 7,  stacking: 5 },
+  lead3: { distress: 12, property: 15, equity: 5,  quality: 1,  stacking: 0 },
+  lead4: { distress: 20, property: 18, equity: 10, quality: 0,  stacking: 5 },
+  lead5: { distress: 30, property: 23, equity: 18, quality: 7,  stacking: 0 },
+  lead6: { distress: 10, property: 14, equity: 7,  quality: 1,  stacking: 0 },
+  lead7: { distress: 8,  property: 12, equity: 7,  quality: 1,  stacking: 0 },
+  lead8: { distress: 18, property: 10, equity: 7,  quality: 0,  stacking: 5 },
+};
+
+function scoreTooltipHTML(lead) {
+  const bd = SCORE_BREAKDOWNS[lead.id];
+  if (!bd) return '';
+  const cats = [
+    { cat: 'Distress Signal', pts: bd.distress, max: 40 },
+    { cat: 'Property Factors', pts: bd.property, max: 25 },
+    { cat: 'Equity Position', pts: bd.equity,   max: 20 },
+    { cat: 'Data Quality',    pts: bd.quality,   max: 15 },
+    { cat: 'Stacking Bonus',  pts: bd.stacking,  max: 15 },
+  ];
+  const rows = cats.map(r => `
+    <div class="tt-row">
+      <span class="tt-cat">${r.cat}</span>
+      <span class="tt-pts ${r.pts === 0 ? 'zero' : ''}">+${r.pts}<span style="opacity:0.25;font-weight:400;font-size:8px;"> /${r.max}</span></span>
+    </div>`).join('');
+  return `<div class="score-tooltip">
+    <div class="tt-title">Score Breakdown</div>
+    ${rows}
+    <div class="tt-total"><span>Total Score</span><span>${lead.score} / 100</span></div>
+  </div>`;
+}
+
+function panelScoreHTML(lead) {
+  const bd = SCORE_BREAKDOWNS[lead.id];
+  if (!bd) return String(lead.score);
+  const cats = [
+    { cat: 'Distress Signal', pts: bd.distress, max: 40 },
+    { cat: 'Property Factors', pts: bd.property, max: 25 },
+    { cat: 'Equity Position', pts: bd.equity,   max: 20 },
+    { cat: 'Data Quality',    pts: bd.quality,   max: 15 },
+    { cat: 'Stacking Bonus',  pts: bd.stacking,  max: 15 },
+  ];
+  const rows = cats.map(r => `
+    <div class="tt-row">
+      <span class="tt-cat">${r.cat}</span>
+      <span class="tt-pts ${r.pts === 0 ? 'zero' : ''}">+${r.pts}<span style="opacity:0.25;font-weight:400;font-size:8px;"> /${r.max}</span></span>
+    </div>`).join('');
+  return `${lead.score}<div class="panel-score-tooltip">
+    <div class="tt-title">Score Breakdown</div>
+    ${rows}
+    <div class="tt-total"><span>Total Score</span><span>${lead.score} / 100</span></div>
+  </div>`;
+}
+
+// ── Delaware County Zip Data ──
+const DELCO_ZIPS = [
+  { zip: '19003', name: 'Ardmore'     },
+  { zip: '19008', name: 'Broomall'    },
+  { zip: '19013', name: 'Chester'     },
+  { zip: '19014', name: 'Chester Hts' },
+  { zip: '19015', name: 'Clifton Hts' },
+  { zip: '19018', name: 'Collingdale' },
+  { zip: '19022', name: 'Crum Lynne'  },
+  { zip: '19023', name: 'Darby'       },
+  { zip: '19026', name: 'Drexel Hill' },
+  { zip: '19029', name: 'Eddystone'   },
+  { zip: '19032', name: 'Folcroft'    },
+  { zip: '19033', name: 'Folsom'      },
+  { zip: '19036', name: 'Glenolden'   },
+  { zip: '19041', name: 'Haverford'   },
+  { zip: '19050', name: 'Lansdowne'   },
+  { zip: '19063', name: 'Media'       },
+  { zip: '19064', name: 'Springfield' },
+  { zip: '19070', name: 'Morton'      },
+  { zip: '19076', name: 'Prospect Pk' },
+  { zip: '19078', name: 'Ridley Park' },
+  { zip: '19079', name: 'Sharon Hill' },
+  { zip: '19081', name: 'Swarthmore'  },
+  { zip: '19082', name: 'Upper Darby' },
+  { zip: '19086', name: 'Wallingford' },
+  { zip: '19094', name: 'Woodlyn'     },
+];
+
+let activeZip = null;
+
+function toggleHeatmap(btn) {
+  const panel = document.getElementById('heatmapPanel');
+  const isOpen = panel.classList.contains('open');
+  if (isOpen) {
+    panel.classList.remove('open');
+    btn.classList.remove('active');
+    if (activeZip) {
+      activeZip = null;
+      renderKanban(activeFilter);
+    }
+  } else {
+    panel.classList.add('open');
+    btn.classList.add('active');
+    renderHeatmap();
+  }
+}
+
+function renderHeatmap() {
+  const zipCounts = {};
+  LEADS.forEach(l => { zipCounts[l.zip] = (zipCounts[l.zip] || 0) + 1; });
+
+  const grid = document.getElementById('heatmapGrid');
+  grid.innerHTML = DELCO_ZIPS.map(z => {
+    const count = zipCounts[z.zip] || 0;
+    const d = count === 0 ? 0 : count === 1 ? 1 : count === 2 ? 2 : 3;
+    const active = activeZip === z.zip ? 'zip-active' : '';
+    const countHtml = count > 0 ? `<span class="zip-count-text">${count} lead${count > 1 ? 's' : ''}</span>` : '';
+    return `<div class="zip-cell zip-d${d} ${active}" onclick="filterByZip('${z.zip}')" title="${z.name} · ${count} lead${count !== 1 ? 's' : ''}">
+      <span class="zip-code-text">${z.zip}</span>
+      <span class="zip-name-text">${z.name}</span>
+      ${countHtml}
+    </div>`;
+  }).join('');
+}
+
+function filterByZip(zip) {
+  if (activeZip === zip) {
+    activeZip = null;
+    // Reset to show all with current tier filter
+    renderKanban(activeFilter);
+    document.querySelectorAll('.filter-pill:not(#heatmapBtn)').forEach(b => b.classList.remove('active'));
+    document.querySelector('.filter-pill').classList.add('active');
+  } else {
+    activeZip = zip;
+    document.querySelectorAll('.filter-pill:not(#heatmapBtn)').forEach(b => b.classList.remove('active'));
+    const stages = ['new','contacted','appt','offer','contract','closed'];
+    const filtered = LEADS.filter(l => l.zip === zip);
+    stages.forEach(stage => {
+      const col = document.getElementById('col-' + stage);
+      const cnt = document.getElementById('count-' + stage);
+      const sl = filtered.filter(l => l.stage === stage);
+      cnt.textContent = sl.length;
+      col.innerHTML = sl.length ? sl.map(renderCard).join('') : `<div class="col-empty">No leads</div>`;
+    });
+    if (selectedLeadId) {
+      const card = document.getElementById('card-' + selectedLeadId);
+      if (card) card.classList.add('selected');
+    }
+  }
+  renderHeatmap();
+}
+
+function quickAction(action, leadId) {
+  selectLead(leadId);
+  setTimeout(() => {
+    const crmTabBtn = document.querySelectorAll('.panel-tab')[3];
+    switchTab('crm', crmTabBtn);
+    if (action === 'call') {
+      const inp = document.getElementById('noteInput');
+      if (inp) {
+        const d = new Date();
+        inp.value = `📞 Call logged — ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+        inp.focus();
+      }
+    } else if (action === 'followup') {
+      const inp = document.getElementById('noteInput');
+      if (inp) { inp.value = '⏰ Follow-up scheduled — '; inp.focus(); }
+    }
+    // 'move' just opens CRM tab where stage buttons are
+  }, 60);
+}
+
+// ── Time Decay ──
+function getDecay(days) {
+  if (days == null || days < 4) return { cls: '', badge: '', label: '' };
+  if (days < 8)  return { cls: 'decay-aging', badge: 'aging', label: `${days}d idle` };
+  if (days < 15) return { cls: 'decay-stale', badge: 'stale', label: `${days}d stale` };
+  if (days < 22) return { cls: 'decay-cold',  badge: 'cold',  label: `${days}d cold` };
+  return           { cls: 'decay-dead',  badge: 'dead',  label: `${days}d dead` };
+}
+
+// ── Render ──
+let activeFilter = 'all';
+let selectedLeadId = null;
+
+const STAGE_COLORS = {
+  new: { bg: '#EEF2FF', text: '#4338CA' },
+  contacted: { bg: '#DBEAFE', text: '#1D4ED8' },
+  appt: { bg: '#FEF3C7', text: '#B45309' },
+  offer: { bg: '#FEF9C3', text: '#B45309' },
+  contract: { bg: '#DCFCE7', text: '#166534' },
+  closed: { bg: '#DCFCE7', text: '#166534' },
+  dead: { bg: '#F3F4F6', text: '#6B7280' },
+};
+
+const STAGE_LABELS = {
+  new: 'New', contacted: 'Contacted', appt: 'Appointment',
+  offer: 'Offer Made', contract: 'Under Contract', closed: 'Closed', dead: 'Dead'
+};
+
+const ACTIVITY_ICONS = {
+  note: `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  search: `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+  chart: `<svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  arrow: `<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+  phone: `<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.36a2 2 0 0 1 1.91-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+  dollar: `<svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+};
+
+function renderCard(lead) {
+  const fillW = lead.score + '%';
+  const decay = getDecay(lead.lastActivityDays);
+  const overdueBadge = lead.overdue ? `<span class="overdue-badge">Overdue</span>` : '';
+  const decayBadge = decay.badge ? `<span class="decay-badge ${decay.badge}">${decay.label}</span>` : '';
+  const stackBadge = lead.stackCount > 1 ? `<span class="tag tag-stacked">×${lead.stackCount}</span>` : '';
+  const cats = lead.categories.map(c => `<span class="tag">${c}</span>`).join('');
+  const meta = lead.followUp
+    ? (lead.overdue ? `<span style="color:var(--red-bright);font-weight:600;">↑ Overdue</span>` : lead.followUpDisplay)
+    : lead.location;
+
+  return `
+    <div class="lead-card tier-${lead.tier} ${decay.cls}" id="card-${lead.id}" onclick="selectLead('${lead.id}')">
+      <div class="decay-bar"></div>
+      <div class="card-top">
+        <div class="card-address">${lead.address}</div>
+        <div class="score-wrap">
+          <div class="card-score">
+            <span class="score-num">${lead.score}</span>
+            <span class="score-label">${lead.tier.toUpperCase()}</span>
+          </div>
+          ${scoreTooltipHTML(lead)}
+        </div>
+      </div>
+      <div class="card-tags">${cats}${stackBadge}</div>
+      <div class="card-score-bar"><div class="card-score-fill" style="width:${fillW}"></div></div>
+      <div class="card-bottom">
+        <span class="card-meta">${meta}</span>
+        <div class="card-indicators">
+          ${overdueBadge}${decayBadge}
+          <span class="indicator ${lead.hasSkip ? 'done' : 'pending'}" title="Skip Trace">ST</span>
+          <span class="indicator ${lead.hasComps ? 'done' : 'pending'}" title="Comps">CP</span>
+          <span class="indicator ${lead.hasOffer ? 'done' : 'pending'}" title="Offer">OF</span>
+        </div>
+      </div>
+      <div class="card-quick-actions" onclick="event.stopPropagation()">
+        <button class="quick-btn" onclick="quickAction('call','${lead.id}')"><span class="qicon">📞</span>Log Call</button>
+        <button class="quick-btn" onclick="quickAction('followup','${lead.id}')"><span class="qicon">⏰</span>Follow-up</button>
+        <button class="quick-btn" onclick="quickAction('move','${lead.id}')"><span class="qicon">→</span>Move Stage</button>
+      </div>
+    </div>`;
+}
+
+function renderKanban(filter) {
+  const stages = ['new','contacted','appt','offer','contract','closed'];
+  const filtered = filter === 'all' ? LEADS :
+    filter === 'hot' ? LEADS.filter(l => l.tier === 'hot') :
+    filter === 'warm' ? LEADS.filter(l => l.tier === 'warm') :
+    LEADS.filter(l => l.categoryIds.includes(filter));
+
+  stages.forEach(stage => {
+    const col = document.getElementById('col-' + stage);
+    const count = document.getElementById('count-' + stage);
+    const stageleads = filtered.filter(l => l.stage === stage);
+    count.textContent = stageleads.length;
+    col.innerHTML = stageleads.length
+      ? stageleads.map(renderCard).join('')
+      : `<div class="col-empty">No leads</div>`;
+  });
+
+  if (selectedLeadId) {
+    const card = document.getElementById('card-' + selectedLeadId);
+    if (card) card.classList.add('selected');
+  }
+}
+
+function filterKanban(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderKanban(filter);
+}
+
+// ── Panel ──
+function selectLead(id) {
+  selectedLeadId = id;
+  const lead = LEADS.find(l => l.id === id);
+  if (!lead) return;
+
+  // Mark selected card
+  document.querySelectorAll('.lead-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('card-' + id);
+  if (card) card.classList.add('selected');
+
+  // Show panel
+  document.getElementById('panelEmpty').style.display = 'none';
+  const full = document.getElementById('panelFull');
+  full.style.display = 'flex';
+
+  // Stage badge
+  const sc = STAGE_COLORS[lead.stage] || STAGE_COLORS.new;
+  const stageBadge = document.getElementById('panelStageBadge');
+  stageBadge.textContent = STAGE_LABELS[lead.stage];
+  stageBadge.style.background = sc.bg;
+  stageBadge.style.color = sc.text;
+
+  document.getElementById('panelAddress').textContent = lead.address + ', ' + lead.location;
+
+  const colors = { hot: 'var(--red-bright)', warm: 'var(--orange)', cool: 'var(--blue)', cold: 'var(--text-muted)' };
+  const c = colors[lead.tier];
+  document.getElementById('panelScoreBig').innerHTML = panelScoreHTML(lead);
+  document.getElementById('panelScoreBig').style.color = c;
+  document.getElementById('panelTier').textContent = lead.tier.toUpperCase();
+  document.getElementById('panelTier').style.color = c;
+  document.getElementById('panelScoreFill').style.width = lead.score + '%';
+  document.getElementById('panelScoreFill').style.background = c;
+
+  // Tags
+  const tags = lead.categories.map(c => `<span class="tag">${c}</span>`).join('');
+  const stacked = lead.stackCount > 1 ? `<span class="tag tag-stacked">×${lead.stackCount} stacked</span>` : '';
+  document.getElementById('panelTags').innerHTML = tags + stacked;
+
+  // Reset to info tab
+  switchTab('info', document.querySelector('.panel-tab'));
+
+  // Render tabs
+  renderInfoTab(lead);
+  renderSkipTab(lead);
+  renderCompsTab(lead);
+  renderCrmTab(lead);
+  renderOfferTab(lead);
+}
+
+function renderInfoTab(lead) {
+  document.getElementById('infoContent').innerHTML = `
+    <div class="info-row"><span class="info-key">Address</span><span class="info-val">${lead.address}, ${lead.location}</span></div>
+    <div class="info-row"><span class="info-key">Category</span><span class="info-val">${lead.categories.join(' · ')}</span></div>
+    <div class="info-row"><span class="info-key">Stage</span><span class="info-val">${STAGE_LABELS[lead.stage]}</span></div>
+    <div class="info-row"><span class="info-key">Score</span><span class="info-val">${lead.score} / 100 · ${lead.tier.toUpperCase()}</span></div>
+    <div class="info-row"><span class="info-key">Follow-up</span><span class="info-val ${lead.overdue ? 'followup-date overdue' : ''}">${lead.followUpDisplay}${lead.overdue ? ' ⚠ Overdue' : ''}</span></div>
+    <div class="info-row"><span class="info-key">Source</span><span class="info-val">${lead.source}</span></div>
+    <div class="info-row"><span class="info-key">Details</span><span class="info-val">${lead.details}</span></div>
+    <div class="info-row">
+      <span class="info-key">Data</span>
+      <span class="info-val">
+        <span class="freshness-dot ${lead.hasSkip ? 'fresh' : 'none'}"></span>Skip Trace &nbsp;
+        <span class="freshness-dot ${lead.hasComps ? 'fresh' : 'none'}"></span>Comps &nbsp;
+        <span class="freshness-dot ${lead.hasOffer ? 'fresh' : 'none'}"></span>Offer
+      </span>
+    </div>`;
+}
+
+function renderSkipTab(lead) {
+  if (!lead.skipTrace) {
+    document.getElementById('skipContent').innerHTML = `
+      <div style="text-align:center;padding:40px 0;color:var(--text-muted);">
+        <p style="font-size:13px;margin-bottom:12px;">No skip trace data yet</p>
+        <button style="padding:8px 20px;background:var(--navy);color:white;border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;">Run Skip Trace</button>
+      </div>`;
+    return;
+  }
+  const st = lead.skipTrace;
+  document.getElementById('skipContent').innerHTML = `
+    <div class="skip-owner">${st.owner}</div>
+    <div class="contact-item">
+      <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.36a2 2 0 0 1 1.91-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+      <div class="contact-detail">
+        <div class="contact-label">Phone</div>
+        <div class="contact-value">${st.phones.map(p => `<a href="tel:${p}">${p}</a>`).join(' &nbsp; ')}</div>
+      </div>
+    </div>
+    ${st.email ? `<div class="contact-item">
+      <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+      <div class="contact-detail">
+        <div class="contact-label">Email</div>
+        <div class="contact-value"><a href="mailto:${st.email}">${st.email}</a></div>
+      </div>
+    </div>` : ''}
+    <div class="contact-item">
+      <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <div class="contact-detail">
+        <div class="contact-label">Mailing Address</div>
+        <div class="contact-value">${st.mailing}</div>
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="contact-detail">
+        <div class="contact-label">Relatives</div>
+        <div class="contact-value">${st.relatives}</div>
+      </div>
+    </div>
+    ${st.notes ? `<div class="info-row" style="margin-top:8px;"><span class="info-key">Notes</span><span class="info-val">${st.notes}</span></div>` : ''}
+    <div class="lookup-section">
+      <div class="lookup-label">Manual Lookup</div>
+      <div class="lookup-links">
+        <a class="lookup-link" href="#" onclick="return false">TruePeopleSearch</a>
+        <a class="lookup-link" href="#" onclick="return false">FastPeopleSearch</a>
+        <a class="lookup-link" href="#" onclick="return false">ThatsThem</a>
+        <a class="lookup-link" href="#" onclick="return false">DelCo Records</a>
+        <a class="lookup-link" href="#" onclick="return false">SpyDialer</a>
+      </div>
+    </div>`;
+}
+
+function renderCompsTab(lead) {
+  if (!lead.comps) {
+    document.getElementById('compsContent').innerHTML = `
+      <div style="text-align:center;padding:40px 0;color:var(--text-muted);">
+        <p style="font-size:13px;margin-bottom:12px;">No comps pulled yet</p>
+        <button style="padding:8px 20px;background:var(--navy);color:white;border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;">Pull Comps</button>
+      </div>`;
+    return;
+  }
+  const cp = lead.comps;
+  const confClass = { high: 'confidence-high', medium: 'confidence-medium', low: 'confidence-low' }[cp.confidence];
+  const rows = cp.list.map(c => `
+    <tr>
+      <td>${c.address}</td>
+      <td class="comp-price">${c.price}</td>
+      <td>${c.date}</td>
+      <td>${c.beds}</td>
+      <td>${c.sqft}</td>
+    </tr>`).join('');
+  document.getElementById('compsContent').innerHTML = `
+    <div class="arv-display">
+      <div class="arv-num">${cp.arv}</div>
+      <div class="arv-meta">
+        <div class="arv-label">Estimated ARV</div>
+        <span class="confidence-badge ${confClass}">${cp.confidence} confidence</span>
+      </div>
+    </div>
+    <table class="comps-table">
+      <thead><tr><th>Address</th><th>Sold</th><th>Date</th><th>Bed/Bath</th><th>Sqft</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function renderCrmTab(lead) {
+  const stages = ['new','contacted','appt','offer','contract','closed','dead'];
+  const stageBtns = stages.map(s => `
+    <button class="stage-btn ${lead.stage === s ? 'active' : ''}" onclick="updateStage('${s}', this)">${STAGE_LABELS[s]}</button>`
+  ).join('');
+
+  const activities = lead.activities.map(a => `
+    <div class="activity-item">
+      <div class="activity-icon">${ACTIVITY_ICONS[a.type] || ACTIVITY_ICONS.note}</div>
+      <div class="activity-content">
+        <div class="activity-text">${a.text}</div>
+        <div class="activity-date">${a.date}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('crmContent').innerHTML = `
+    <div class="stage-selector">${stageBtns}</div>
+    <div class="followup-row">
+      <span class="followup-label">Follow-up</span>
+      <span class="followup-date ${lead.overdue ? 'overdue' : ''}">${lead.followUpDisplay}${lead.overdue ? ' · OVERDUE' : ''}</span>
+    </div>
+    <div class="activity-section-label">Activity</div>
+    <div class="activity-list" id="activityList">${activities}</div>
+    <div class="add-note-row">
+      <input class="add-note-input" id="noteInput" placeholder="Add a note…" type="text">
+      <button class="add-note-btn" id="addNoteBtn" onclick="addNote()">Add</button>
+    </div>`;
+}
+
+function renderOfferTab(lead) {
+  const o = lead.offer || { arv: 0, repairs: 0, fee: 8000, holding: 3000 };
+  document.getElementById('offerContent').innerHTML = `
+    <div class="offer-grid">
+      <div class="offer-field">
+        <label>ARV ($)</label>
+        <input class="offer-input" id="oArv" type="number" value="${o.arv}" oninput="calcOffer()">
+      </div>
+      <div class="offer-field">
+        <label>Repairs ($)</label>
+        <input class="offer-input" id="oRepairs" type="number" value="${o.repairs}" oninput="calcOffer()">
+      </div>
+      <div class="offer-field">
+        <label>Wholesale Fee ($)</label>
+        <input class="offer-input" id="oFee" type="number" value="${o.fee}" oninput="calcOffer()">
+      </div>
+      <div class="offer-field">
+        <label>Holding Costs ($)</label>
+        <input class="offer-input" id="oHolding" type="number" value="${o.holding}" oninput="calcOffer()">
+      </div>
+    </div>
+    <div class="offer-result">
+      <div class="offer-result-label">Max Offer (70% Rule)</div>
+      <div class="offer-result-num" id="offerResult">$0</div>
+      <div class="offer-formula">= (ARV × 70%) − Repairs − Fee − Holding</div>
+    </div>
+    <div class="offer-breakdown" id="offerBreakdown"></div>`;
+  calcOffer();
+}
+
+function calcOffer() {
+  const arv = parseFloat(document.getElementById('oArv')?.value) || 0;
+  const repairs = parseFloat(document.getElementById('oRepairs')?.value) || 0;
+  const fee = parseFloat(document.getElementById('oFee')?.value) || 0;
+  const holding = parseFloat(document.getElementById('oHolding')?.value) || 0;
+  const mao = (arv * 0.70) - repairs - fee - holding;
+  const fmt = n => '$' + Math.max(0,Math.round(n)).toLocaleString();
+  if (document.getElementById('offerResult')) {
+    document.getElementById('offerResult').textContent = fmt(mao);
+    document.getElementById('offerBreakdown').innerHTML = `
+      <div class="breakdown-row"><span class="breakdown-key">ARV × 70%</span><span class="breakdown-val">${fmt(arv * 0.7)}</span></div>
+      <div class="breakdown-row"><span class="breakdown-key">− Repairs</span><span class="breakdown-val">−${fmt(repairs)}</span></div>
+      <div class="breakdown-row"><span class="breakdown-key">− Wholesale Fee</span><span class="breakdown-val">−${fmt(fee)}</span></div>
+      <div class="breakdown-row"><span class="breakdown-key">− Holding</span><span class="breakdown-val">−${fmt(holding)}</span></div>`;
+  }
+}
+
+function updateStage(stage, btn) {
+  document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function addNote() {
+  const input = document.getElementById('noteInput');
+  const btn = document.getElementById('addNoteBtn');
+  const text = input.value.trim();
+  if (!text) return;
+  const list = document.getElementById('activityList');
+  const item = document.createElement('div');
+  item.className = 'activity-item';
+  item.innerHTML = `
+    <div class="activity-icon">${ACTIVITY_ICONS.note}</div>
+    <div class="activity-content">
+      <div class="activity-text">${text}</div>
+      <div class="activity-date">just now</div>
+    </div>`;
+  list.prepend(item);
+  input.value = '';
+  btn.textContent = '✓';
+  btn.classList.add('success');
+  setTimeout(() => { btn.textContent = 'Add'; btn.classList.remove('success'); }, 2000);
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+  const pane = document.getElementById('tab-' + name);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+  else {
+    const tabs = document.querySelectorAll('.panel-tab');
+    if (tabs[0]) tabs[0].classList.add('active');
+  }
+}
+
+// ── Map View ──
+const ZIP_CENTROIDS = {
+  '19003': [40.007, -75.297], '19008': [39.968, -75.352],
+  '19013': [39.851, -75.360], '19014': [39.857, -75.418],
+  '19015': [39.927, -75.293], '19018': [39.912, -75.277],
+  '19022': [39.867, -75.336], '19023': [39.918, -75.264],
+  '19026': [39.950, -75.299], '19029': [39.862, -75.341],
+  '19032': [39.899, -75.309], '19033': [39.891, -75.328],
+  '19036': [39.900, -75.289], '19041': [40.002, -75.305],
+  '19050': [39.940, -75.272], '19063': [39.918, -75.388],
+  '19064': [39.930, -75.328], '19070': [39.904, -75.341],
+  '19076': [39.883, -75.306], '19078': [39.878, -75.326],
+  '19079': [39.903, -75.272], '19081': [39.904, -75.351],
+  '19082': [39.955, -75.268], '19086': [39.893, -75.357],
+  '19094': [39.875, -75.344],
+};
+
+const TIER_COLORS = { hot: '#C0392B', warm: '#C07028', cool: '#2563EB', cold: '#8A98AE' };
+
+let leafletMap = null;
+
+function openMapView() {
+  document.getElementById('mapModal').classList.add('open');
+  setTimeout(initLeafletMap, 100);
+}
+
+function closeMapView() {
+  document.getElementById('mapModal').classList.remove('open');
+}
+
+function initLeafletMap() {
+  if (leafletMap) { leafletMap.invalidateSize(); return; }
+
+  leafletMap = L.map('leafletMap', { zoomControl: true }).setView([39.918, -75.325], 12);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO',
+    subdomains: 'abcd',
+    maxZoom: 18
+  }).addTo(leafletMap);
+
+  // Count leads per zip
+  const zipCounts = {};
+  const zipLeads = {};
+  LEADS.forEach(l => {
+    zipCounts[l.zip] = (zipCounts[l.zip] || 0) + 1;
+    if (!zipLeads[l.zip]) zipLeads[l.zip] = [];
+    zipLeads[l.zip].push(l);
+  });
+
+  // Draw circles for all zip codes
+  DELCO_ZIPS.forEach(z => {
+    const coords = ZIP_CENTROIDS[z.zip];
+    if (!coords) return;
+    const count = zipCounts[z.zip] || 0;
+
+    // Style by density
+    const styles = [
+      { color: '#94A3B8', fill: '#F1F5F9', fillOpacity: 0.35, weight: 1,   radius: 420 },  // 0
+      { color: '#B8985A', fill: '#FEF9C3', fillOpacity: 0.72, weight: 2,   radius: 780 },  // 1
+      { color: '#D97706', fill: '#FDE68A', fillOpacity: 0.78, weight: 2.5, radius: 1050 }, // 2
+      { color: '#1B2A4A', fill: '#1B2A4A', fillOpacity: 0.70, weight: 2.5, radius: 1300 }, // 3+
+    ];
+    const s = count === 0 ? styles[0] : count === 1 ? styles[1] : count === 2 ? styles[2] : styles[3];
+
+    const circle = L.circle(coords, {
+      color: s.color, fillColor: s.fill,
+      fillOpacity: s.fillOpacity, weight: s.weight, radius: s.radius,
+    }).addTo(leafletMap);
+
+    if (count > 0) {
+      // Build lead rows for popup
+      const leadRows = zipLeads[z.zip].map(l => `
+        <div class="map-popup-lead">
+          <div class="map-popup-tier" style="background:${TIER_COLORS[l.tier]}"></div>
+          <span class="map-popup-addr">${l.address}</span>
+          <span class="map-popup-score">${l.score}</span>
+        </div>`).join('');
+
+      circle.bindPopup(`
+        <div class="map-popup">
+          <div class="map-popup-zip">${z.zip}</div>
+          <div class="map-popup-name">${z.name}</div>
+          <div class="map-popup-count">${count} active lead${count > 1 ? 's' : ''} in pipeline</div>
+          ${leadRows}
+          <button class="map-popup-btn" onclick="filterByZipFromMap('${z.zip}')">Filter Pipeline → ${z.zip}</button>
+        </div>`, { maxWidth: 260, className: 'map-leaflet-popup' });
+    } else {
+      circle.bindTooltip(`${z.zip} · ${z.name} — No leads`, {
+        sticky: true, opacity: 0.85,
+        className: 'leaflet-tooltip'
+      });
+    }
+
+    // Hover highlight
+    circle.on('mouseover', function() {
+      if (count > 0) this.setStyle({ weight: s.weight + 1.5, fillOpacity: Math.min(s.fillOpacity + 0.15, 1) });
+    });
+    circle.on('mouseout', function() {
+      this.setStyle({ weight: s.weight, fillOpacity: s.fillOpacity });
+    });
+  });
+
+  // Render sidebar list
+  renderMapSidebar(zipCounts, zipLeads);
+}
+
+function renderMapSidebar(zipCounts, zipLeads) {
+  const dotColor = n => n === 0 ? '#CBD5E1' : n === 1 ? '#B8985A' : n === 2 ? '#D97706' : '#1B2A4A';
+  const sorted = [...DELCO_ZIPS].sort((a, b) => (zipCounts[b.zip] || 0) - (zipCounts[a.zip] || 0));
+
+  document.getElementById('mapZipList').innerHTML = sorted.map(z => {
+    const count = zipCounts[z.zip] || 0;
+    const filterBtn = count > 0
+      ? `<button class="map-zip-filter-btn" onclick="filterByZipFromMap('${z.zip}')">Filter →</button>`
+      : '';
+    return `<div class="map-zip-item">
+      <div class="map-zip-dot" style="background:${dotColor(count)}"></div>
+      <div class="map-zip-info">
+        <div class="map-zip-code">${z.zip}</div>
+        <div class="map-zip-name">${z.name}</div>
+      </div>
+      <div class="map-zip-count ${count > 0 ? 'has-leads' : ''}">${count > 0 ? count + ' lead' + (count > 1 ? 's' : '') : '—'}</div>
+      ${filterBtn}
+    </div>`;
+  }).join('');
+}
+
+function filterByZipFromMap(zip) {
+  closeMapView();
+  // Open heatmap if closed
+  const panel = document.getElementById('heatmapPanel');
+  if (!panel.classList.contains('open')) {
+    toggleHeatmap(document.getElementById('heatmapBtn'));
+  }
+  // Small delay to let modal close
+  setTimeout(() => filterByZip(zip), 120);
+}
+
+// ── Init ──
+renderKanban('all');
+
+// Auto-select first hot lead
+setTimeout(() => {
+  const hotLead = LEADS.find(l => l.tier === 'hot') || LEADS[0];
+  selectLead(hotLead.id);
+}, 300);
+</script>
+</body>
+</html>
