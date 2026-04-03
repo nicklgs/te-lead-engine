@@ -6,7 +6,6 @@ import Link from 'next/link';
 import type { Lead, LeadStage, Activity, Offer } from '@/lib/types';
 import { STAGES, CATEGORY_MAP, SKIP_TRACE_LINKS } from '@/lib/constants';
 import { scoreLead } from '@/lib/scoring';
-import { DEMO_LEADS } from '@/lib/demo-data';
 import ScoreBar from '@/components/ScoreBar';
 import ActivityTimeline from '@/components/ActivityTimeline';
 import DataFreshness from '@/components/DataFreshness';
@@ -29,8 +28,7 @@ export default function LeadDetailPage() {
         const fbLead = await getLead(id);
         if (fbLead) { const { score, tier } = scoreLead(fbLead); setLead({ ...fbLead, score, scoreTier: tier }); setSelectedStage(fbLead.stage); if (fbLead.followUp) setFollowUpDate(new Date(fbLead.followUp).toISOString().split('T')[0]); return; }
       } catch { /* fall through */ }
-      const demoLead = DEMO_LEADS.find((l) => l.id === id);
-      if (demoLead) { const { score, tier } = scoreLead(demoLead); const scored = { ...demoLead, score, scoreTier: tier }; setLead(scored); setSelectedStage(scored.stage); if (scored.followUp) setFollowUpDate(new Date(scored.followUp).toISOString().split('T')[0]); }
+      // Lead not found in Firebase
       setLoading(false);
     }
     loadLead().finally(() => setLoading(false));

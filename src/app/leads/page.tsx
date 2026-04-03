@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import type { Lead, CategoryId } from '@/lib/types';
 import { CATEGORIES, STAGES, ZIP_TIERS } from '@/lib/constants';
 import { scoreLead } from '@/lib/scoring';
-import { DEMO_LEADS } from '@/lib/demo-data';
 import LeadCard from '@/components/LeadCard';
 
 function applyScores(leads: Lead[]): Lead[] {
@@ -35,13 +34,9 @@ export default function LeadsPage() {
       try {
         const { getLeads } = await import('@/lib/firebase');
         const fbLeads = await getLeads();
-        if (fbLeads.length > 0) {
-          setLeads(applyScores(fbLeads));
-        } else {
-          setLeads(applyScores(DEMO_LEADS));
-        }
+        setLeads(applyScores(fbLeads));
       } catch {
-        setLeads(applyScores(DEMO_LEADS));
+        setLeads([]);
       } finally {
         setLoading(false);
       }

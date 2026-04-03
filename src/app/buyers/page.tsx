@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { Buyer, BuyerType } from '@/lib/types';
 import { BUYER_TYPES, ZIP_TIERS } from '@/lib/constants';
-import { DEMO_BUYERS } from '@/lib/demo-data';
+
 
 const TYPE_COLORS: Record<BuyerType, string> = { flipper: '#f59e0b', landlord: '#3b82f6', developer: '#8b5cf6', hedge_fund: '#10b981' };
 
@@ -21,7 +21,7 @@ export default function BuyersPage() {
 
   useEffect(() => {
     async function loadBuyers() {
-      try { const { getBuyers } = await import('@/lib/firebase'); const fb = await getBuyers(); setBuyers(fb.length > 0 ? fb : DEMO_BUYERS); } catch { setBuyers(DEMO_BUYERS); } finally { setLoading(false); }
+      try { const { getBuyers } = await import('@/lib/firebase'); const fb = await getBuyers(); setBuyers(fb); } catch { setBuyers([]); } finally { setLoading(false); }
     }
     loadBuyers();
   }, []);

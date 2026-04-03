@@ -5,7 +5,6 @@ import Link from 'next/link';
 import type { Lead, LeadStage, CategoryId } from '@/lib/types';
 import { STAGES, CATEGORIES, ZIP_TIERS } from '@/lib/constants';
 import { scoreLead } from '@/lib/scoring';
-import { DEMO_LEADS } from '@/lib/demo-data';
 import PipelineStage from '@/components/PipelineStage';
 
 function applyScores(leads: Lead[]): Lead[] {
@@ -40,9 +39,9 @@ export default function DashboardPage() {
       try {
         const { getLeads } = await import('@/lib/firebase');
         const fbLeads = await getLeads();
-        setLeads(applyScores(fbLeads.length > 0 ? fbLeads : DEMO_LEADS));
+        setLeads(applyScores(fbLeads));
       } catch {
-        setLeads(applyScores(DEMO_LEADS));
+        setLeads([]);
       } finally {
         setLoading(false);
       }
